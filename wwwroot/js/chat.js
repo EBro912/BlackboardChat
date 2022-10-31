@@ -3,7 +3,7 @@
 var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
 //Disable the send button until connection is established.
-document.getElementById("sendButton").disabled = true;
+document.getElementById("messageInput").disabled = true;
 
 connection.on("ReceiveMessage", function (message) {
     var li = document.createElement("li");
@@ -15,15 +15,22 @@ connection.on("ReceiveMessage", function (message) {
 });
 
 connection.start().then(function () {
-    document.getElementById("sendButton").disabled = false;
+    document.getElementById("messageInput").disabled = false;
 }).catch(function (err) {
     return console.error(err.toString());
 });
 
-document.getElementById("sendButton").addEventListener("click", function (event) {
-    var message = document.getElementById("messageInput").value;
-    connection.invoke("SendMessage", message).catch(function (err) {
-        return console.error(err.toString());
-    });
-    event.preventDefault();
+const input = document.getElementById("messageInput");
+input.addEventListener("keyup", function (event) {
+    if (event.key === "Enter") {
+        var message = input.value;
+        if (message !== "") {
+            connection.invoke("SendMessage", message).catch(function (err) {
+                return console.error(err.toString());
+            });
+            // reset the input box when a message is sent
+            input.value = "";
+            event.preventDefault();
+        }
+    }
 });
