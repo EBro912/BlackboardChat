@@ -2,18 +2,17 @@
 
 var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
-//Disable the send button until connection is established.
+//Disable the input box until connection is established.
 document.getElementById("messageInput").disabled = true;
 
+// When a message is received by the server, display it
 connection.on("ReceiveMessage", function (message) {
     var li = document.createElement("li");
     document.getElementById("messagesList").appendChild(li);
-    // We can assign user-supplied strings to an element's textContent because it
-    // is not interpreted as markup. If you're assigning in any other way, you 
-    // should be aware of possible script injection concerns.
     li.textContent = `${message}`;
 });
 
+// Once we are connected to the server, enable the message box
 connection.start().then(function () {
     document.getElementById("messageInput").disabled = false;
 }).catch(function (err) {

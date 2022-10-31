@@ -23,3 +23,7 @@ body {
     bottom: 0;
     padding: 50px;
 }
+
+ol li {
+    list-style-type: none;
+}
