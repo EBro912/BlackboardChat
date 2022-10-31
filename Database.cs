@@ -15,7 +15,7 @@ namespace BlackboardChat
                 + "Name VARCHAR(100) NOT NULL,"
                 + "IsProfessor TINYINT NOT NULL);");
 
-            // create the Messages table if it doesn't already exits
+            // create the Messages table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Messages ("
                 + "Channel INT NOT NULL,"
                 + "Author INT NOT NULL,"
@@ -27,11 +27,12 @@ namespace BlackboardChat
         // adds a user to the database
         // in the real world, the program would use blackboard's database for users
         // but we can use this to make dummy users
-        public static async Task AddUser(User user)
+        public static async Task AddUser(string name, bool isProfessor)
         {
             using var connection = new SqliteConnection(name);
+            var parameters = new { Name = name, IsProfessor = isProfessor };
             await connection.ExecuteAsync("INSERT INTO Users (Name, IsProfessor)" +
-                "VALUES (@Name, @IsProfessor);", user);
+                "VALUES (@Name, @IsProfessor);", parameters);
         }
 
         // inserts a message into the database

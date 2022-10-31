@@ -17,10 +17,9 @@ connection.on("ReceiveMessage", function (message) {
     addMessage(message);
 });
 
-// When we first connect, 
+// sync messages with the server
 connection.on("SyncMessages", function (messages) {
     messages.forEach(x => {
-        console.log(x);
         addMessage(x.content);
     });
 });
