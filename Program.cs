@@ -1,3 +1,10 @@
+/*
+ * Libraries used:
+ * Microsoft.Data.Sqlite
+ * Dapper
+ */
+
+using BlackboardChat;
 using BlackboardChat.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,5 +32,7 @@ app.UseAuthorization();
 
 app.MapRazorPages();
 app.MapHub<Chat>("/chat");
+
+Database.Setup();
 
 app.Run();
