@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Dapper;
 using BlackboardChat.Data;
+using System.Collections.Concurrent;
 
 namespace BlackboardChat
 {
@@ -8,18 +9,21 @@ namespace BlackboardChat
     public class Database
     {
         private static readonly string name = "Data Source=BlackboardChat.sqlite";
+
         
         // create all required tables on startup
-        public static void Setup()
+        public static async void Setup()
         {
             using var connection = new SqliteConnection(name);
             // create the Users table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Users ("
+                + "Id INTEGER PRIMARY KEY,"
                 + "Name VARCHAR(100) NOT NULL,"
                 + "IsProfessor TINYINT NOT NULL);");
 
             // create the Messages table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Messages ("
+                + "Id INTEGER PRIMARY KEY,"
                 + "Channel INT NOT NULL,"
                 + "Author INT NOT NULL,"
                 // leave some extra character space just in case
@@ -28,6 +32,7 @@ namespace BlackboardChat
 
             // create the Channels table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Channels ("
+                + "Id INTEGER PRIMARY KEY,"
                 + "Name VARCHAR(50) NOT NULL,"
                 + "IsForum TINYINT NOT NULL,"
                 // this character limit should never be reached but give plenty of room just in case
@@ -37,10 +42,10 @@ namespace BlackboardChat
         // adds a user to the database
         // in the real world, the program would use blackboard's database for users
         // but we can use this to make dummy users
-        public static async Task AddUser(string name, bool isProfessor)
+        public static async Task AddUser(string username, bool isProfessor)
         {
             using var connection = new SqliteConnection(name);
-            var parameters = new { Name = name, IsProfessor = isProfessor };
+            var parameters = new { Name = username, IsProfessor = isProfessor };
             await connection.ExecuteAsync("INSERT INTO Users (Name, IsProfessor)" +
                 "VALUES (@Name, @IsProfessor);", parameters);
         }
@@ -68,7 +73,7 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             var parameters = new { Id = id };
-            return await connection.QuerySingleAsync<User>("SELECT * FROM Users WHERE rowid = @Id", id);
+            return await connection.QuerySingleAsync<User>("SELECT * FROM Users WHERE rowid = @Id", parameters);
         }
 
         // get the professor from the database
@@ -92,6 +97,23 @@ namespace BlackboardChat
             using var connection = new SqliteConnection(name);
             var parameters = new { Id = id };
             return await connection.QueryAsync<Message>("SELECT * FROM Messages WHERE Channel = @Id", parameters);
+        }
+
+        // creates a dummy class list with one professor and 10 students
+        public static async Task AddDummyUsers()
+        {
+            await AddUser("Professor Jim", true);
+            await AddUser("Bob Jones", false);
+            await AddUser("Steve Carson", false);
+            await AddUser("Amanda White", false);
+            await AddUser("Alex Smith", false);
+            await AddUser("Samantha Wallace", false);
+            await AddUser("Peter McCall", false);
+            await AddUser("Joe Peterson", false);
+            await AddUser("Ariana Larson", false);
+            await AddUser("Hannah Cooper", false);
+            await AddUser("James Walker", false);
+            Console.WriteLine("Dummy Users Generated. Please do not call this function again unless necessary!");
         }
     }
 }
