@@ -4,9 +4,12 @@ using BlackboardChat.Data;
 
 namespace BlackboardChat
 {
+    // handles all database related functionality
     public class Database
     {
         private static readonly string name = "Data Source=BlackboardChat.sqlite";
+        
+        // create all required tables on startup
         public static void Setup()
         {
             using var connection = new SqliteConnection(name);
@@ -22,6 +25,13 @@ namespace BlackboardChat
                 // leave some extra character space just in case
                 + "Content VARCHAR(1010) NOT NULL,"
                 + "TimeStamp DATETIME NOT NULL);");
+
+            // create the Channels table if it doesn't already exist
+            connection.Execute("CREATE TABLE IF NOT EXISTS Channels ("
+                + "Name VARCHAR(50) NOT NULL,"
+                + "IsForum TINYINT NOT NULL,"
+                // this character limit should never be reached but give plenty of room just in case
+                + "Members VARCHAR(10000) NOT NULL);");
         }
 
         // adds a user to the database
@@ -44,6 +54,15 @@ namespace BlackboardChat
                 "VALUES (@Channel, @Author, @Content, @TimeStamp);", parameters);
         }
 
+        // inserts a new channel into the database
+        public static async Task AddChannel(string? name, bool isForum, string? members)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Name = name, IsForum = isForum, Members = members };
+            await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Members)" +
+                "VALUES (@Name, @IsForum, @Members);", parameters);
+        }
+
         // search for a user by their id
         public static async Task<User> GetUserById(int id)
         {
@@ -60,12 +79,19 @@ namespace BlackboardChat
             return await connection.QuerySingleAsync<User>("SELECT * FROM Users WHERE IsProfessor = 1");
         }
 
-        // returns all messages from the database
-        // TODO: make method to retreive messages from a certain channel
-        public static async Task<IEnumerable<Message>> GetAllMessages()
+        // returns all users from the database
+        public static async Task<IEnumerable<User>> GetAllUsers()
         {
             using var connection = new SqliteConnection(name);
-            return await connection.QueryAsync<Message>("SELECT * FROM Messages");
+            return await connection.QueryAsync<User>("SELECT * FROM Users");
+        }
+
+        // returns all messages from the database in a certain channel
+        public static async Task<IEnumerable<Message>> GetAllMessagesFromChannel(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            return await connection.QueryAsync<Message>("SELECT * FROM Messages WHERE Channel = @Id", parameters);
         }
     }
 }
