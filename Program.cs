@@ -40,6 +40,6 @@ Database.Setup();
 // and you need to create them
 // after creating the dummy users, make sure to recomment this line!
 
-// await Database.AddDummyUsers();
+//await Database.AddDummyUsers();
 
 app.Run();

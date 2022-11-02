@@ -14,6 +14,9 @@ var localUser = null;
 //Disable the input box until connection is established.
 document.getElementById("messageInput").disabled = true;
 
+// hide the add channel button until the user is the professor
+document.getElementById("addChannel").hidden = true;
+
 // Helper function to display a message
 function addMessage(channel, user, message) {
     // only display messages sent in the current channel
@@ -26,6 +29,17 @@ function addMessage(channel, user, message) {
     }
 }
 
+// Helper function to create a channel
+function addChannel(id, name) {
+    var button = document.createElement("button");
+    button.className = "btn btn-secondary";
+    button.id = `channelID_${id}`;
+    button.onclick = function () { changeChannel(id); };
+    button.innerText = name;
+    let addButton = document.getElementById("addChannel");
+    document.getElementById("channelButtonHolder").insertBefore(button, addButton);
+}
+
 // When a message is received by the server, display it
 connection.on("ReceiveMessage", function (channel, user, message) {
     addMessage(channel, user, message);
@@ -36,6 +50,13 @@ connection.on("SyncChannelMessages", function (messages) {
     messages.forEach(x => {
         addMessage(x.channel, x.author, x.content);
     });
+});
+
+// sync channels with the server
+connection.on("SyncChannels", function (channels) {
+    channels.forEach(x => {
+        addChannel(x.id, x.name);
+    })
 });
 
 // sync users with the server
@@ -53,13 +74,23 @@ connection.on("LoginSuccessful", function (user) {
     connection.invoke("RequestUsers").catch(function (err) {
         return console.error(err.toString());
     });
-    // after we are connected to the server, request any existing messages
+    // after we are connected to the server, request any existing channels and messages
+    connection.invoke("RequestChannels").catch(function (err) {
+        return console.error(err.toString());
+    });
     connection.invoke("RequestChannelMessages", channelID).catch(function (err) {
         return console.error(err.toString());
     });
+
+    if (localUser.isProfessor) {
+        document.getElementById("addChannel").hidden = false;
+    }
 });
 
-
+connection.on("CreateChannel", function(channel) {
+    addChannel(channel.id, channel.name);
+});
+   
 
 // Once we are connected to the server, enable the message box
 connection.start().then(function () {
@@ -108,4 +139,20 @@ input.addEventListener("keyup", function (event) {
             event.preventDefault();
         }
     }
+});
+
+const add = document.getElementById("addChannel");
+add.addEventListener("click", function (event) {
+    let name = prompt("Enter a name for the new channel");
+    if (name === null)
+        return;
+    name = name.replaceAll(' ', '-');
+    if (name.length > 50) {
+        alert("Channel name must be shorter than 50 characters.");
+        return;
+    }
+    // TODO: handle if a channel name already exists
+    connection.invoke("AddChannel", name).catch(function (err) {
+        return console.error(err.toString());
+    });
 });

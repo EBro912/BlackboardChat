@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using BlackboardChat.Data;
+using Microsoft.AspNetCore.SignalR;
 
 namespace BlackboardChat.Hubs
 {
@@ -30,6 +31,23 @@ namespace BlackboardChat.Hubs
         {
             var users = await Database.GetAllUsers();
             await Clients.Caller.SendAsync("SyncUsers", users.ToList());
+        }
+
+        // send existing channels to users 
+        // TODO: only return channels that the user can see
+        public async Task RequestChannels()
+        {
+            var channels = await Database.GetAllChannels();
+            await Clients.Caller.SendAsync("SyncChannels", channels.ToList());
+        }
+
+        public async Task AddChannel(string name)
+        {
+            // TODO: handle adding members to a channel
+            await Database.AddChannel(name, false, "1");
+            // after creating the channel in the database, get its row id to be sent back
+            Channel channel = await Database.GetChannelByName(name);
+            await Clients.All.SendAsync("CreateChannel", channel);
         }
     }
 }

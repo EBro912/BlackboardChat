@@ -3,11 +3,12 @@
         <h5 id="loggedInUser">Logged In As: None</h5>
         <h5 id="loggedInUserRole">None</h5>
         <div class="row">        
-            <h3 id="channelName">channel-1</h3>
+            <h3 id="channelName">open-chat</h3>
         </div>
-        <div class="container">
-            <button type="button" class="btn btn-secondary" id="channelID_0" onclick="changeChannel(0)" disabled>channel-1</button>
-            <button type="button" class="btn btn-secondary" id="channelID_1" onclick="changeChannel(1)">channel-2</button>
+        <div class="container" id="channelButtonHolder">
+            <!-- This channel will always exist by default -->
+            <button type="button" class="btn btn-secondary" id="channelID_0" onclick="changeChannel(0)" disabled>open-chat</button>
+            <button type="button" class="btn btn-secondary" id="addChannel">+</button>
         </div>
         <div class="row">&nbsp;</div>
         <div class="row" id="bottom">

@@ -12,7 +12,7 @@ namespace BlackboardChat
 
         
         // create all required tables on startup
-        public static async void Setup()
+        public static void Setup()
         {
             using var connection = new SqliteConnection(name);
             // create the Users table if it doesn't already exist
@@ -33,10 +33,24 @@ namespace BlackboardChat
             // create the Channels table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Channels ("
                 + "Id INTEGER PRIMARY KEY,"
-                + "Name VARCHAR(50) NOT NULL,"
+                + "Name VARCHAR(50) UNIQUE NOT NULL,"
                 + "IsForum TINYINT NOT NULL,"
                 // this character limit should never be reached but give plenty of room just in case
                 + "Members VARCHAR(10000) NOT NULL);");
+
+            // removes all existing channels for testing purposes
+            // comment this out if you want to keep the channels made
+            connection.Execute("DELETE FROM Channels");
+
+            // removes all existing messages for testing purposes
+            // comment this out if you want to keep the messages sent
+            connection.Execute("DELETE FROM Messages");
+
+            // if the default channel doesn't exist, add it to the databsae
+            // we can shortcut here since we know how big our class is and their ids
+            // realistically everyone would have to be dynamically added
+            connection.Execute("INSERT OR IGNORE INTO Channels (Name, IsForum, Members)" +
+                "VALUES ('open-chat', 0, '1,2,3,4,5,6,7,8,9,10,11');");
         }
 
         // adds a user to the database
@@ -60,12 +74,20 @@ namespace BlackboardChat
         }
 
         // inserts a new channel into the database
-        public static async Task AddChannel(string? name, bool isForum, string? members)
+        public static async Task AddChannel(string? channelName, bool isForum, string? members)
         {
             using var connection = new SqliteConnection(name);
-            var parameters = new { Name = name, IsForum = isForum, Members = members };
+            var parameters = new { Name = channelName, IsForum = isForum, Members = members };
             await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Members)" +
                 "VALUES (@Name, @IsForum, @Members);", parameters);
+        }
+
+        // gets a channel's information by its name
+        public static async Task<Channel> GetChannelByName(string channelName)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Name = channelName };
+            return await connection.QuerySingleAsync<Channel>("SELECT * FROM Channels WHERE Name = @Name", parameters);
         }
 
         // search for a user by their id
@@ -89,6 +111,15 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             return await connection.QueryAsync<User>("SELECT * FROM Users");
+        }
+
+        // returns all channels from the database
+        // TODO: only return channels that the user can see
+        public static async Task<IEnumerable<Channel>> GetAllChannels()
+        {
+            using var connection = new SqliteConnection(name);
+            // exclude the default open-chat channel since it's already there
+            return await connection.QueryAsync<Channel>("SELECT * FROM Channels WHERE Name != 'open-chat'");
         }
 
         // returns all messages from the database in a certain channel
