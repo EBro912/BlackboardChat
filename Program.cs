@@ -31,7 +31,7 @@ app.UseRouting();
 app.UseAuthorization();
 
 app.MapRazorPages();
-app.MapHub<Chat>("/chat");
+app.MapHub<Server>("/chat");
 
 Database.Setup();
 

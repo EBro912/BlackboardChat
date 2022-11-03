@@ -10,7 +10,6 @@ namespace BlackboardChat
     {
         private static readonly string name = "Data Source=BlackboardChat.sqlite";
 
-        
         // create all required tables on startup
         public static void Setup()
         {

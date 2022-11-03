@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 
 namespace BlackboardChat.Hubs
 {
-    public class Chat : Hub
+    public class Server : Hub
     {
         public async Task SendMessage(int channelID, int userID, string message)
         {

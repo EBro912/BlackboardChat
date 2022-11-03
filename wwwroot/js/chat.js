@@ -3,6 +3,7 @@
 var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 
 // cache all users since the class list will (probably) not change
+// prevents us from having to ping the database every time we need to retrieve a user
 // in the real world, students can drop the class but we dont have to worry about that here
 var userCache = [];
 
@@ -32,6 +33,7 @@ function addMessage(channel, user, message) {
 // Helper function to create a channel
 function addChannel(id, name) {
     var button = document.createElement("button");
+    button.type = "button";
     button.className = "btn btn-secondary";
     button.id = `channelID_${id}`;
     button.onclick = function () { changeChannel(id); };
@@ -45,6 +47,14 @@ connection.on("ReceiveMessage", function (channel, user, message) {
     addMessage(channel, user, message);
 });
 
+connection.on("CreateChannel", function (channel) {
+    // convert the database's member storage into an actual array of user IDs
+    // and check if we actually have permission to see this channel
+    if (channel.members.split(',').includes(localUser.id.toString())) {
+        addChannel(channel.id, channel.name);
+    }
+});
+
 // sync messages with the server
 connection.on("SyncChannelMessages", function (messages) {
     messages.forEach(x => {
@@ -55,14 +65,17 @@ connection.on("SyncChannelMessages", function (messages) {
 // sync channels with the server
 connection.on("SyncChannels", function (channels) {
     channels.forEach(x => {
-        addChannel(x.id, x.name);
-    })
+        // convert the database's member storage into an actual array of user IDs
+        // and check if we actually have permission to see this channel
+        if (x.members.split(',').includes(localUser.id.toString())) {
+            addChannel(x.id, x.name);
+        }
+    });
 });
 
 // sync users with the server
 connection.on("SyncUsers", function (users) {
     userCache = users;
-    console.log(userCache);
     console.log(`Cached ${userCache.length} users.`);
 });
 
@@ -86,10 +99,6 @@ connection.on("LoginSuccessful", function (user) {
         document.getElementById("addChannel").hidden = false;
     }
 });
-
-connection.on("CreateChannel", function(channel) {
-    addChannel(channel.id, channel.name);
-});
    
 
 // Once we are connected to the server, enable the message box
@@ -106,8 +115,6 @@ connection.start().then(function () {
     return console.error(err.toString());
 });
 
-// TODO: dynamically load channels and add event listeners for each as they are added
-// TODO: set/handle channel ids based on their ID in the database
 // TODO: actually be able to create/delete channels
 function changeChannel(id) {
     // disable the new channel from being clicked and enable the old one
