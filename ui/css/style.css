@@ -1,0 +1,98 @@
+/* general background styling */
+body {
+    background-color: whitesmoke;
+    font-family:Verdana, Geneva, Tahoma, sans-serif
+}
+
+#content {
+    text-align: center;
+}
+
+li {
+    border: 1px;
+    border-style: solid;
+    list-style: none;
+    padding: 2px;
+}
+
+a:active a:hover {
+    color: aqua;
+}
+
+a {
+    color:white;
+}
+
+#chatbox {
+    border-color: black;
+    border: 5px;
+    border-style: solid;
+    border-radius: 5px;
+    height:90vh;
+    text-align: left;
+    padding-top: 10px;
+    background-color: lightslategray;
+}
+
+#messageinput {
+    background-color: lightsteelblue;
+    float: inline-end;
+    height: 10vh;
+    border-color: black;
+    border: 5px;
+    border-style: solid;
+    border-radius: 5px;
+    border-top: 0px;
+    text-align: left;
+}
+
+input{
+    background-color: lightsteelblue;
+    border-style: none;
+    width: 100%;
+    height: 60%;
+}
+
+/* moves "New Message:" text to left side of input field */
+label {
+    float:left
+}
+
+nav {
+    color: antiquewhite;
+    float:left;
+    width: fit-content;
+    padding: 10px;
+    height:100vh;
+    text-align: center;
+    border: 5px;
+    border-radius: 5px;
+    background-image: linear-gradient(darkblue, blue);
+}
+
+/* messages sent by other users */
+#otheruser {
+    background-color: white;
+    float: left;
+    margin-left: 5%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    padding: 2px;
+}
+
+/* messages sent by current user */
+#user {
+    background-color: lightskyblue;
+    float: right;
+    margin-right: 5%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    padding: 2px;
+}
+
+/* makes HW1 Chat box grey, temp and wouldnt be hardcoded for final ui */
+.navchat:nth-child(3) {
+    background-color: lightslategray;
+}

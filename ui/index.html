@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Prototype UI</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row no-gutters">
+        <!-- 2 column div for navbar -->
+        <div class="col-3-pull-3">
+            <nav id="navbar">
+                <ul id="navlist">
+                    <li class="navlabel">
+                        <text>Chat Rooms</text>
+                    </li>
+                    <li class="navchat">
+                        <a href="index.html">Open Chat</a>
+                    </li>
+                    <li class="navchat">
+                        <a href="index.html">HW1 Chat</a>
+                    </li>
+                    <li class="navchat">
+                        <a href="index.html">Forum: HW1 Question?</a>
+                    </li>
+                    <li class="navchat">
+                        <a href="index.html">HW2 Chat</a>
+                    </li>
+                    <li class="navchat">
+                        <a href="index.html">Prof. Smith</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <!-- 8 column div for chatbox that shows messages -->
+        <div class="col-9">
+            <div id="chatbox">
+                <text class="message" id="otheruser">Joe: Hello I had a question about HW1</text>
+                <br>
+                <text class="message" id="user">You: Hi, what was the question that you had?</text>
+                <br>
+                <text class="message" id="otheruser">Joe: I was wondering what the due date was</text>
+                <br>
+            </div>
+            <div id="messageinput">
+                    <label for="message">New message:</label><br>
+                    <input type="text" id="message" name="message" onchange="sendmessage()">
+            </div>
+        </div>
+    </div>
+</div>
+  <script src="js/ui.js"></script>
+</body>
+</html>
