@@ -23,10 +23,18 @@ function addMessage(channel, user, message) {
     // only display messages sent in the current channel
     // TODO (maybe): some sort of notification/unread system for other channels
     if (channel === channelID) {
-        var li = document.createElement("li");
-        document.getElementById("messagesList").appendChild(li);
-        // TODO: maybe add some formatting (bold and/or color) to each user's name
-        li.textContent = `${userCache.at(user-1).name}: ${message}`;
+        var isLocalUser = user === localUser.id;
+        var msg = `${isLocalUser ? "You" : userCache.at(user - 1).name}: ${message}`
+
+        // create message box with users message
+        var messagebox = document.createElement('text');
+        messagebox.setAttribute('class', 'message');
+        messagebox.setAttribute('id', isLocalUser ? 'user' : 'otheruser');
+        messagebox.textContent = msg;
+
+        // append message box and break
+        var chat = document.getElementById('chatbox');
+        chat.appendChild(messagebox);
     }
 }
 
@@ -39,7 +47,7 @@ function addChannel(id, name) {
     button.onclick = function () { changeChannel(id); };
     button.innerText = name;
     let addButton = document.getElementById("addChannel");
-    document.getElementById("channelButtonHolder").insertBefore(button, addButton);
+    document.getElementById("buttonlist").insertBefore(button, addButton);
 }
 
 // When a message is received by the server, display it
@@ -81,8 +89,6 @@ connection.on("SyncUsers", function (users) {
 
 connection.on("LoginSuccessful", function (user) {
     localUser = user;
-    document.getElementById("loggedInUser").innerText = `Logged In As: ${localUser.name} (ID: ${localUser.id})`;
-    document.getElementById("loggedInUserRole").innerText = localUser.isProfessor ? "Professor" : "Student";
     // request a cache of all users
     connection.invoke("RequestUsers").catch(function (err) {
         return console.error(err.toString());
@@ -121,11 +127,9 @@ function changeChannel(id) {
     document.getElementById(`channelID_${channelID}`).disabled = false;
     var newChnl = document.getElementById(`channelID_${id}`);
     newChnl.disabled = true;
-    // update the channel name at the top of the screen
-    document.getElementById("channelName").innerText = newChnl.innerText;
     channelID = id;
     // remove all displayed messages from the message list
-    document.getElementById("messagesList").replaceChildren();
+    document.getElementById("chatbox").replaceChildren();
     // request the channels messages
     // TODO: possibly cache messages that we already have
     connection.invoke("RequestChannelMessages", channelID).catch(function (err) {

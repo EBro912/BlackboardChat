@@ -44,7 +44,8 @@ namespace BlackboardChat.Hubs
         public async Task AddChannel(string name)
         {
             // TODO: handle adding members to a channel
-            await Database.AddChannel(name, false, "1");
+            // all users can see new channels for now, this should be fixed
+            await Database.AddChannel(name, false, "1,2,3,4,5,6,7,8,9,10,11");
             // after creating the channel in the database, get its row id to be sent back
             Channel channel = await Database.GetChannelByName(name);
             await Clients.All.SendAsync("CreateChannel", channel);
