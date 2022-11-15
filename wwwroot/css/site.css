@@ -97,3 +97,17 @@ nav {
     padding: 2px;
 }
 
+#usersShown {
+    color: antiquewhite;
+    padding: 10px;
+    height: 100vh;
+    width: 60%;
+    text-align: center;
+    border: 5px;
+    border-radius: 5px;
+    background-image: linear-gradient(darkblue, blue);
+}
+
+.users:hover {
+    background-image: linear-gradient(teal, blue);
+}

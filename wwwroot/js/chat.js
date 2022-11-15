@@ -18,6 +18,9 @@ document.getElementById("messageInput").disabled = true;
 // hide the add channel button until the user is the professor
 document.getElementById("addChannel").hidden = true;
 
+//Hide the request 1-on-1 button until the user is a student
+document.getElementById("requestChat").hidden = true;
+
 // Helper function to display a message
 function addMessage(channel, user, message) {
     // only display messages sent in the current channel
@@ -42,7 +45,7 @@ function addMessage(channel, user, message) {
 function addChannel(id, name) {
     var button = document.createElement("button");
     button.type = "button";
-    button.className = "btn btn-secondary";
+    button.className = "btn btn-info";
     button.id = `channelID_${id}`;
     button.onclick = function () { changeChannel(id); };
     button.innerText = name;
@@ -103,6 +106,10 @@ connection.on("LoginSuccessful", function (user) {
 
     if (localUser.isProfessor) {
         document.getElementById("addChannel").hidden = false;
+    }
+
+    if (!localUser.isProfessor) {
+        document.getElementById("requestChat").hidden = false;
     }
 });
    
