@@ -1,7 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Dapper;
 using BlackboardChat.Data;
-using System.Collections.Concurrent;
 
 namespace BlackboardChat
 {
@@ -97,6 +96,14 @@ namespace BlackboardChat
             return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM Users WHERE rowid = @Id", parameters);
         }
 
+        // search for a channel by its id
+        public static async Task<Channel> GetChannelById(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            return await connection.QueryFirstOrDefaultAsync<Channel>("SELECT * FROM Channels WHERE rowid = @Id", parameters);
+        }
+
         // get the professor from the database
         // this assumes that only one user (the professor) will have the IsProfessor boolean set to true
         public static async Task<User> GetProfessor()
@@ -113,7 +120,6 @@ namespace BlackboardChat
         }
 
         // returns all channels from the database
-        // TODO: only return channels that the user can see
         public static async Task<IEnumerable<Channel>> GetAllChannels()
         {
             using var connection = new SqliteConnection(name);

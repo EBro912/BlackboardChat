@@ -19,7 +19,6 @@ document.getElementById("messageInput").disabled = true;
 document.getElementById("addChannel").hidden = true;
 
 //Hide the request 1-on-1 button until the user is a student
-//Hide the request 1-on-1 button until the user is a student
 document.getElementById("requestChat").hidden = true;
 
 // Helper function to display a message
@@ -74,6 +73,16 @@ connection.on("SyncChannelMessages", function (messages) {
     });
 });
 
+connection.on("SyncChannelUsers", function (users) {
+    const userList = document.getElementById("usersShown");
+    users.split(',').forEach(x => {
+        var li = document.createElement("li");
+        li.className = "users";
+        li.innerText = userCache.at(x - 1).name;
+        userList.appendChild(li);
+    });
+});
+
 // sync channels with the server
 connection.on("SyncChannels", function (channels) {
     channels.forEach(x => {
@@ -99,6 +108,9 @@ connection.on("LoginSuccessful", function (user) {
     });
     // after we are connected to the server, request any existing channels and messages
     connection.invoke("RequestChannels").catch(function (err) {
+        return console.error(err.toString());
+    });
+    connection.invoke("RequestUsersInChannel", channelID).catch(function (err) {
         return console.error(err.toString());
     });
     connection.invoke("RequestChannelMessages", channelID).catch(function (err) {
@@ -138,6 +150,15 @@ function changeChannel(id) {
     channelID = id;
     // remove all displayed messages from the message list
     document.getElementById("chatbox").replaceChildren();
+
+    // remove all displayed users on the sidebar
+    document.getElementById("usersShown").replaceChildren();
+
+    // request users in new channel to display on sidebar
+    connection.invoke("RequestUsersInChannel", channelID).catch(function (err) {
+        return console.error(err.toString());
+    });
+
     // request the channels messages
     // TODO: possibly cache messages that we already have
     connection.invoke("RequestChannelMessages", channelID).catch(function (err) {
@@ -170,7 +191,6 @@ add.addEventListener("click", function (event) {
         alert("Channel name must be shorter than 50 characters.");
         return;
     }
-    // TODO: handle if a channel name already exists
     connection.invoke("AddChannel", name).catch(function (err) {
         return console.error(err.toString());
     });
@@ -182,6 +202,5 @@ request.addEventListener("click", function (event) {
     connection.invoke('AddProfUserChannel', localUser).catch(function (err){
         return console.error(err.toString());
     });
-
 });
 

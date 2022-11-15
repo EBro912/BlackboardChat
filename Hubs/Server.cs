@@ -8,7 +8,6 @@ namespace BlackboardChat.Hubs
         public async Task SendMessage(int channelID, int userID, string message)
         {
             await Clients.All.SendAsync("ReceiveMessage", channelID, userID, message);
-            // TODO: store the correct channel and user ids in the database
             await Database.AddMessage(channelID, userID, message, DateTime.Now);
         }
 
@@ -34,7 +33,6 @@ namespace BlackboardChat.Hubs
         }
 
         // send existing channels to users 
-        // TODO: only return channels that the user can see
         public async Task RequestChannels()
         {
             var channels = await Database.GetAllChannels();
@@ -65,6 +63,21 @@ namespace BlackboardChat.Hubs
             // after creating the channel in the database, get its row id to be sent back
             channel = await Database.GetChannelByName(chName);
             await Clients.All.SendAsync("CreateChannel", channel);
+        }
+
+        public async Task RequestUsersInChannel(int channelId)
+        {
+            // edge case, 0 is the default channel which isnt in the database and everyone can see
+            // so just return everyone
+            if (channelId == 0)
+            {
+                await Clients.Caller.SendAsync("SyncChannelUsers", "1,2,3,4,5,6,7,8,9,10,11");
+            }
+            else
+            {
+                Channel channel = await Database.GetChannelById(channelId);
+                await Clients.Caller.SendAsync("SyncChannelUsers", channel.Members);
+            }
         }
     }
 }
