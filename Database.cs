@@ -86,7 +86,7 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             var parameters = new { Name = channelName };
-            return await connection.QuerySingleAsync<Channel>("SELECT * FROM Channels WHERE Name = @Name", parameters);
+            return await connection.QueryFirstOrDefaultAsync<Channel>("SELECT * FROM Channels WHERE Name = @Name", parameters);
         }
 
         // search for a user by their id
@@ -94,7 +94,7 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             var parameters = new { Id = id };
-            return await connection.QuerySingleAsync<User>("SELECT * FROM Users WHERE rowid = @Id", parameters);
+            return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM Users WHERE rowid = @Id", parameters);
         }
 
         // get the professor from the database
@@ -102,7 +102,7 @@ namespace BlackboardChat
         public static async Task<User> GetProfessor()
         {
             using var connection = new SqliteConnection(name);
-            return await connection.QuerySingleAsync<User>("SELECT * FROM Users WHERE IsProfessor = 1");
+            return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM Users WHERE IsProfessor = 1");
         }
 
         // returns all users from the database

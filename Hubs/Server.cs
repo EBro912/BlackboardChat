@@ -45,9 +45,25 @@ namespace BlackboardChat.Hubs
         {
             // TODO: handle adding members to a channel
             // all users can see new channels for now, this should be fixed
+            Channel channel = await Database.GetChannelByName(name);
+            if (channel != null) { return; }
             await Database.AddChannel(name, false, "1,2,3,4,5,6,7,8,9,10,11");
             // after creating the channel in the database, get its row id to be sent back
-            Channel channel = await Database.GetChannelByName(name);
+            channel = await Database.GetChannelByName(name);
+            await Clients.All.SendAsync("CreateChannel", channel);
+        }
+
+        public async Task AddProfUserChannel(User x)
+        {
+            // TODO: handle adding members to a channel
+            // all users can see new channels for now, this should be fixed
+            string chName = x.Name.Replace(' ', '-');
+            Channel channel = await Database.GetChannelByName(chName);
+            if (channel != null) { return; }
+            string members = "1," + x.Id;
+            await Database.AddChannel(chName, false, members);
+            // after creating the channel in the database, get its row id to be sent back
+            channel = await Database.GetChannelByName(chName);
             await Clients.All.SendAsync("CreateChannel", channel);
         }
     }

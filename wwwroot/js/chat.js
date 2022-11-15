@@ -19,6 +19,7 @@ document.getElementById("messageInput").disabled = true;
 document.getElementById("addChannel").hidden = true;
 
 //Hide the request 1-on-1 button until the user is a student
+//Hide the request 1-on-1 button until the user is a student
 document.getElementById("requestChat").hidden = true;
 
 // Helper function to display a message
@@ -174,3 +175,13 @@ add.addEventListener("click", function (event) {
         return console.error(err.toString());
     });
 });
+
+
+const request = document.getElementById("requestChat");
+request.addEventListener("click", function (event) {
+    connection.invoke('AddProfUserChannel', localUser).catch(function (err){
+        return console.error(err.toString());
+    });
+
+});
+
