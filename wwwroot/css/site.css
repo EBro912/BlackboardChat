@@ -38,6 +38,9 @@ button {
     padding-top: 10px;
     background-color: lightslategray;
     overflow-y: auto;
+    overflow-wrap:anywhere;
+    display:flex;
+    flex-direction:column;
 }
 
 #messagebox {
@@ -81,23 +84,24 @@ nav {
 /* messages sent by other users */
 #otheruser {
     background-color: white;
-    display: table;
     margin-left: 5%;
     margin-top: 5px;
     margin-bottom: 5px;
     border-radius: 5px;
     padding: 2px;
+    width:fit-content;
 }
 
 /* messages sent by current user */
 #user {
     background-color: lightskyblue;
-    display: table;
     margin-left: 5%;
     margin-top: 5px;
     margin-bottom: 5px;
     border-radius: 5px;
     padding: 2px;
+    align-self: flex-end;
+    width: fit-content;
 }
 
 #usersShown {
