@@ -55,6 +55,15 @@ connection.on("CreateChannel", function (channel) {
     }
 });
 
+
+//connection.on("CreateProfStudentChannel", function (channel) {
+//    //create a channel between only Prof and student requesting channel
+//    if ()
+
+//});
+
+
+
 // sync messages with the server
 connection.on("SyncChannelMessages", function (messages) {
     messages.forEach(x => {
