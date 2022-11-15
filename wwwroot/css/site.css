@@ -43,21 +43,21 @@ button {
 #messagebox {
     background-color: lightsteelblue;
     float: inline-end;
-    /*height: 10vh;*/
+    height: 10vh;
     border-color: black;
     border: 5px;
     border-style: solid;
     border-radius: 5px;
     border-top: 0px;
     text-align: left;
-    overflow-y: auto;
 }
 
-input {
+textarea {
     background-color: lightsteelblue;
     border-style: none;
     width: 100%;
-    height:60%;
+    height: 60%;
+    resize: none !important;
 }
 
 /* moves "New Message:" text to left side of input field */
