@@ -37,25 +37,27 @@ button {
     text-align: left;
     padding-top: 10px;
     background-color: lightslategray;
+    overflow-y: scroll;
 }
 
 #messagebox {
     background-color: lightsteelblue;
     float: inline-end;
-    height: 10vh;
+    /*height: 10vh;*/
     border-color: black;
     border: 5px;
     border-style: solid;
     border-radius: 5px;
     border-top: 0px;
     text-align: left;
+    overflow-y: scroll;
 }
 
 input {
     background-color: lightsteelblue;
     border-style: none;
     width: 100%;
-    height: 60%;
+    height:60%;
 }
 
 /* moves "New Message:" text to left side of input field */
@@ -73,6 +75,7 @@ nav {
     border: 5px;
     border-radius: 5px;
     background-image: linear-gradient(darkblue, blue);
+    overflow-y: scroll;
 }
 
 /* messages sent by other users */
@@ -106,6 +109,7 @@ nav {
     border: 5px;
     border-radius: 5px;
     background-image: linear-gradient(darkblue, blue);
+    overflow-y: scroll;
 }
 
 .users:hover {
