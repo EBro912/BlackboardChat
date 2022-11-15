@@ -59,7 +59,7 @@ textarea {
     background-color: lightsteelblue;
     border-style: none;
     width: 100%;
-    height: 60%;
+    height: 100%;
     resize: none !important;
 }
 
