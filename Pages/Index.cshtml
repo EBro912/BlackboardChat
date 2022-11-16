@@ -11,18 +11,22 @@
     <!-- 2 column div for navbar -->
     <div class="col-3">
         <nav id="navbar">
-            <ul id="navlist">
-                <li class="navlabel">
-                    <button type="button" class="btn btn-outline-success" id="logbtn">Open Log</button>
-                    <br />
-                    <text>Chat Rooms</text>
-                </li>
-                <div id="buttonlist" class="btn-group-justified btn-group-vertical">
+            <div class="dropdown" id="settingsDropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                             Settings
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenu">
+                            <button class="dropdown-item" type="button">Log</button>
+                            <button class="dropdown-item" type="button">Add/Remove User</button>
+                            <button class="dropdown-item" type="button">Mute/Unmute User</button>
+                            <button class="dropdown-item btn-danger" type="button">Delete Chatroom</button>
+                         </div>
+           </div>               
+           <div id="buttonlist" class="btn-group-justified btn-group-vertical">
                     <button type="button" class="btn btn-info" id="channelID_0" onclick="changeChannel(0)" disabled>open-chat</button>
                     <button type="button" class="btn btn-outline-success" id="addChannel">Add Chat Room</button>
-                     <button type="button" class="btn btn-outline-success" id="requestChat">Request One-on-One</button>
-                 </div>
-            </ul>
+                    <button type="button" class="btn btn-outline-success" id="requestChat">Request One-on-One</button>
+           </div>
         </nav>
     </div>
     <!-- 8 column div for chatbox that shows messages -->
@@ -44,3 +48,6 @@
 </body>
 <script src="~/js/signalr/dist/browser/signalr.js"></script>
 <script src="~/js/chat.js"></script>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>

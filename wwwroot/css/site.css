@@ -28,11 +28,6 @@ a {
     color: white;
 }
 
-button {
-    display: block;
-    padding: 2px;
-}
-
 #chatbox {
     border-color: black;
     border: 5px;
