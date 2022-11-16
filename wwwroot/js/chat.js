@@ -18,8 +18,12 @@ document.getElementById("messageInput").disabled = true;
 // hide the add channel button until the user is the professor
 document.getElementById("addChannel").hidden = true;
 
+// hide the open log button until the user is the professor (temp)
+document.getElementById("logbtn").hidden = true;
+
 //Hide the request 1-on-1 button until the user is a student
 document.getElementById("requestChat").hidden = true;
+
 
 // Helper function to display a message
 function addMessage(channel, user, message) {
@@ -119,6 +123,7 @@ connection.on("LoginSuccessful", function (user) {
 
     if (localUser.isProfessor) {
         document.getElementById("addChannel").hidden = false;
+        document.getElementById("logbtn").hidden = false;
     }
 
     if (!localUser.isProfessor) {

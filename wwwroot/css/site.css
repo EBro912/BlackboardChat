@@ -15,6 +15,11 @@ li {
     padding: 2px;
 }
 
+.navlabel {
+    list-style:none;
+    border:none;
+}
+
 a:active a:hover {
     color: aqua;
 }
