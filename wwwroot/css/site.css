@@ -90,6 +90,7 @@ nav {
 #otheruser {
     background-color: white;
     margin-left: 5%;
+    margin-right: 5%;
     margin-top: 5px;
     margin-bottom: 5px;
     border-radius: 5px;
@@ -100,6 +101,7 @@ nav {
 /* messages sent by current user */
 #user {
     background-color: lightskyblue;
+    margin-left: 5%;
     margin-right: 5%;
     margin-top: 5px;
     margin-bottom: 5px;
