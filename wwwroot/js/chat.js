@@ -20,6 +20,7 @@ document.getElementById("addChannel").hidden = true;
 
 // hide the open log button until the user is the professor (temp)
 document.getElementById("settingsDropdown").hidden = true;
+document.getElementById("studentSettings").hidden = true;
 
 //Hide the request 1-on-1 button until the user is a student
 document.getElementById("requestChat").hidden = true;
@@ -128,6 +129,7 @@ connection.on("LoginSuccessful", function (user) {
 
     if (!localUser.isProfessor) {
         document.getElementById("requestChat").hidden = false;
+        document.getElementById("studentSettings").hidden = false;
     }
 });
    

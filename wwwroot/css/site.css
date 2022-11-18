@@ -1,7 +1,7 @@
 /* general background styling */
 body {
     background-color: whitesmoke;
-    font-family: Verdana, Geneva, Tahoma, sans-serif
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 #content {
@@ -71,7 +71,7 @@ label {
 nav {
     color: antiquewhite;
     float: right;
-    width: fit-content;
+    width: 100%;
     padding: 10px;
     height: 100vh;
     text-align: center;
@@ -110,7 +110,7 @@ nav {
     color: antiquewhite;
     padding: 10px;
     height: 100vh;
-    width: 60%;
+    width: 100%;
     text-align: center;
     border: 5px;
     border-radius: 5px;

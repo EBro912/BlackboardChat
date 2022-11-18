@@ -8,28 +8,45 @@
 <body>
 <div class="container-fluid">
 <div class="row no-gutters">
-    <!-- 2 column div for navbar -->
+    <!-- 3 column div for navbar and settings -->
     <div class="col-3">
         <nav id="navbar">
+
+            <!-- Professor settings -->
             <div class="dropdown" id="settingsDropdown">
                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                              Settings
                         </button>
                         <div class="dropdown-menu" aria-labelledby="dropdownMenu">
-                            <button class="dropdown-item" type="button">Log</button>
-                            <button class="dropdown-item" type="button">Add/Remove User</button>
-                            <button class="dropdown-item" type="button">Mute/Unmute User</button>
+                            <button class="dropdown-item" type="button">Open log</button>
+                            <button class="dropdown-item" type="button">Add user(s) to chat room</button>
+                            <button class="dropdown-item" type="button">Removes user(s) from chat room</button>
+                            <button class="dropdown-item" type="button">Mute user(s)</button>
+                            <button class="dropdown-item" type="button">Unmute user(s)</button>
                             <button class="dropdown-item btn-danger" type="button">Delete Chatroom</button>
+                            <button class="dropdown-item btn-danger" type="button">Delete messages</button>
                          </div>
-           </div>               
-           <div id="buttonlist" class="btn-group-justified btn-group-vertical">
-                    <button type="button" class="btn btn-info" id="channelID_0" onclick="changeChannel(0)" disabled>open-chat</button>
-                    <button type="button" class="btn btn-outline-success" id="addChannel">Add Chat Room</button>
-                    <button type="button" class="btn btn-outline-success" id="requestChat">Request One-on-One</button>
+           </div>
+
+           <!-- Student settings -->
+            <div class="dropdown" id="studentSettings">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Settings
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenu">
+                    <button class="dropdown-item" type="button">Delete own messages</button>
+                </div>
+            </div>
+         
+            <!-- Buttons to add/request chats -->
+            <div id="buttonlist" class="btn-group-justified btn-group-vertical">
+                <button type="button" class="btn btn-info" id="channelID_0" onclick="changeChannel(0)" disabled>open-chat</button>
+                <button type="button" class="btn btn-outline-success" id="addChannel">Add Chat Room</button>
+                <button type="button" class="btn btn-outline-success" id="requestChat">Request One-on-One</button>
            </div>
         </nav>
     </div>
-    <!-- 8 column div for chatbox that shows messages -->
+    <!-- 6 column div for chatbox that shows messages -->
     <div class="col-6">
         <div id="chatbox">
             <!-- New messages will go here -->
@@ -38,6 +55,8 @@
                 <textarea maxlength="1000" id="messageInput" name="messageInput" placeholder="New Message:"></textarea>
         </div>
     </div>
+
+    <!-- 3 column div for users display -->
     <div class="col-3">
         <ul id="usersShown">
             <!-- Channel members will go here -->
