@@ -101,6 +101,14 @@ namespace BlackboardChat
             return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM Users WHERE rowid = @Id", parameters);
         }
 
+        // search for a user by their name
+        public static async Task<User> GetUserByName(string userName)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Name = userName };
+            return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM Users WHERE Name = @Name", parameters);
+        }
+
         // search for a channel by its id
         public static async Task<Channel> GetChannelById(int id)
         {
@@ -152,6 +160,13 @@ namespace BlackboardChat
             using var connection = new SqliteConnection(name);
             var parameters = new { Id = id };
             await connection.ExecuteAsync("DELETE FROM Messages WHERE Channel = @Id", parameters);
+        }
+
+        public static async Task UpdateChannelMembers(int id, string members)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id, Members = members };
+            await connection.ExecuteAsync("UPDATE Channels SET Members = @Members WHERE rowid = @Id", parameters);
         }
 
         // creates a dummy class list with one professor and 10 students

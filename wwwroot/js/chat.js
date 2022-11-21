@@ -64,6 +64,9 @@ connection.on("ReceiveMessage", function (channel, user, message) {
 });
 
 connection.on("CreateChannel", function (channel) {
+    // if we already have access to the channel, then skip it
+    if (document.getElementById(`channelID_${channel.id}`))
+        return;
     // convert the database's member storage into an actual array of user IDs
     // and check if we actually have permission to see this channel
     if (channel.members.split(',').includes(localUser.id.toString())) {
@@ -75,6 +78,18 @@ connection.on("RemoveChannel", function (channel) {
     // only attempt to delete the channel if the user has access to it
     if (channel.members.split(',').includes(localUser.id.toString())) {
         document.getElementById(`channelID_${channel.id}`).remove();       
+    }
+});
+
+// helper function to make removing certain users from channels easier
+connection.on("RemoveChannelForId", function (channel, id) {
+    // only attempt to delete the channel if our id matches the requsted id
+    if (localUser.id === id) {
+        // if the user is viewing the channel they are being removed from, force them to change to the default channel
+        if (channelID === channel.id) {
+            changeChannel(0);
+        }
+        document.getElementById(`channelID_${channel.id}`).remove();
     }
 });
 
@@ -186,6 +201,24 @@ function deleteChannel() {
     if (name === null)
         return;
     connection.invoke("DeleteChannel", name).catch(function (err) {
+        return console.error(err.toString());
+    });
+}
+
+function addUserToChannel() {
+    let name = prompt("Enter the name of the user to add to the channel");
+    if (name === null)
+        return;
+    connection.invoke("AddUserToChannel", channelID, name).catch(function (err) {
+        return console.error(err.toString());
+    });
+}
+
+function removeUserFromChannel() {
+    let name = prompt("Enter the name of the user to remove from the channel");
+    if (name === null)
+        return;
+    connection.invoke("RemoveUserFromChannel", channelID, name).catch(function (err) {
         return console.error(err.toString());
     });
 }

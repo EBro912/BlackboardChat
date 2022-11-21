@@ -94,5 +94,44 @@ namespace BlackboardChat.Hubs
                 await Clients.All.SendAsync("RemoveChannel", channel);
             }
         }
+
+        public async Task AddUserToChannel(int channelId, string name)
+        {
+            User user = await Database.GetUserByName(name);
+            if (user != null)
+            {
+                Channel channel = await Database.GetChannelById(channelId);
+                // only update the channel list if the user doesn't exist in the member list
+                if (channel.Members != null && !channel.Members.Split(',').Contains(user.Id.ToString()))
+                {
+                    channel.Members += "," + user.Id;
+                    await Database.UpdateChannelMembers(channel.Id, channel.Members);
+                    await Clients.All.SendAsync("CreateChannel", channel);
+                }
+            }
+        }
+
+        public async Task RemoveUserFromChannel(int channelId, string name)
+        {
+            User user = await Database.GetUserByName(name);
+            // prevent the professor from removing themselves
+            if (user != null && !user.IsProfessor)
+            {
+                Channel channel = await Database.GetChannelById(channelId);
+                if (channel.Members != null)
+                {
+                    List<string> members = channel.Members.Split(',').ToList();
+                    // only update the channel list if the user exists in the member list
+                    if (members.Contains(user.Id.ToString()))
+                    {
+                        // since we aren't adding, we have to do some finagling to make sure the format of the member string stays the same
+                        members.Remove(user.Id.ToString());
+                        channel.Members = string.Join(',', members);
+                        await Database.UpdateChannelMembers(channel.Id, channel.Members);
+                        await Clients.All.SendAsync("RemoveChannelForId", channel, user.Id);
+                    }
+                }
+            }
+        }
     }
 }
