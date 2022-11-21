@@ -140,6 +140,20 @@ namespace BlackboardChat
             return await connection.QueryAsync<Message>("SELECT * FROM Messages WHERE Channel = @Id", parameters);
         }
 
+        public static async Task DeleteChannel(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            await connection.ExecuteAsync("DELETE FROM Channels WHERE rowid = @Id", parameters);
+        }
+
+        public static async Task DeleteMessagesInChannel(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            await connection.ExecuteAsync("DELETE FROM Messages WHERE Channel = @Id", parameters);
+        }
+
         // creates a dummy class list with one professor and 10 students
         public static async Task AddDummyUsers()
         {

@@ -71,6 +71,13 @@ connection.on("CreateChannel", function (channel) {
     }
 });
 
+connection.on("RemoveChannel", function (channel) {
+    // only attempt to delete the channel if the user has access to it
+    if (channel.members.split(',').includes(localUser.id.toString())) {
+        document.getElementById(`channelID_${channel.id}`).remove();       
+    }
+});
+
 // sync messages with the server
 connection.on("SyncChannelMessages", function (messages) {
     messages.forEach(x => {
@@ -169,6 +176,16 @@ function changeChannel(id) {
     // request the channels messages
     // TODO: possibly cache messages that we already have
     connection.invoke("RequestChannelMessages", channelID).catch(function (err) {
+        return console.error(err.toString());
+    });
+}
+
+// TODO: convert this to a popup/dropdown that lets the user select a channel to delete
+function deleteChannel() {
+    let name = prompt("Enter the name of the channel to delete");
+    if (name === null)
+        return;
+    connection.invoke("DeleteChannel", name).catch(function (err) {
         return console.error(err.toString());
     });
 }
