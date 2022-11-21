@@ -1,29 +1,123 @@
-html {
-  font-size: 14px;
-}
-
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
+/* general background styling */
 body {
-  margin-bottom: 60px;
+    background-color: whitesmoke;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
-#bottom {
-    position: fixed;
+#content {
+    text-align: center;
+}
+
+li {
+    border: 1px;
+    border-style: solid;
+    list-style: none;
+    padding: 2px;
+}
+
+.navlabel {
+    list-style:none;
+    border:none;
+}
+
+a:active a:hover {
+    color: aqua;
+}
+
+a {
+    color: white;
+}
+
+#chatbox {
+    border-color: black;
+    border: 5px;
+    border-style: solid;
+    border-radius: 5px;
+    height: 90vh;
+    text-align: left;
+    padding-top: 10px;
+    background-color: lightslategray;
+    overflow-y: auto;
+    overflow-wrap:anywhere;
+    display:flex;
+    flex-direction:column;
+}
+
+#messagebox {
+    background-color: lightsteelblue;
+    float: inline-end;
+    height: 10vh;
+    border-color: black;
+    border: 5px;
+    border-style: solid;
+    border-radius: 5px;
+    border-top: 0px;
+    text-align: left;
+}
+
+textarea {
+    background-color: lightsteelblue;
+    border-style: none;
     width: 100%;
-    bottom: 0;
-    padding: 50px;
+    height: 100%;
+    resize: none !important;
 }
 
-ol li {
-    list-style-type: none;
+/* moves "New Message:" text to left side of input field */
+label {
+    float: left
+}
+
+nav {
+    color: antiquewhite;
+    float: right;
+    width: 100%;
+    padding: 10px;
+    height: 100vh;
+    text-align: center;
+    border: 5px;
+    border-radius: 5px;
+    background-image: linear-gradient(darkblue, blue);
+    overflow-y: auto;
+}
+
+/* messages sent by other users */
+#otheruser {
+    background-color: white;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    padding: 2px;
+    width:fit-content;
+}
+
+/* messages sent by current user */
+#user {
+    background-color: lightskyblue;
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    padding: 2px;
+    align-self: flex-end;
+    width: fit-content;
+}
+
+#usersShown {
+    color: antiquewhite;
+    padding: 10px;
+    height: 100vh;
+    width: 100%;
+    text-align: center;
+    border: 5px;
+    border-radius: 5px;
+    background-image: linear-gradient(darkblue, blue);
+    overflow-y: auto;
+}
+
+.users:hover {
+    background-image: linear-gradient(teal, blue);
 }

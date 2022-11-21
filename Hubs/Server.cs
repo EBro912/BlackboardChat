@@ -8,7 +8,6 @@ namespace BlackboardChat.Hubs
         public async Task SendMessage(int channelID, int userID, string message)
         {
             await Clients.All.SendAsync("ReceiveMessage", channelID, userID, message);
-            // TODO: store the correct channel and user ids in the database
             await Database.AddMessage(channelID, userID, message, DateTime.Now);
         }
 
@@ -34,7 +33,6 @@ namespace BlackboardChat.Hubs
         }
 
         // send existing channels to users 
-        // TODO: only return channels that the user can see
         public async Task RequestChannels()
         {
             var channels = await Database.GetAllChannels();
@@ -44,10 +42,57 @@ namespace BlackboardChat.Hubs
         public async Task AddChannel(string name)
         {
             // TODO: handle adding members to a channel
-            await Database.AddChannel(name, false, "1");
-            // after creating the channel in the database, get its row id to be sent back
+            // all users can see new channels for now, this should be fixed
             Channel channel = await Database.GetChannelByName(name);
+            if (channel != null) { return; }
+            await Database.AddChannel(name, false, "1,2,3,4,5,6,7,8,9,10,11");
+            // after creating the channel in the database, get its row id to be sent back
+            channel = await Database.GetChannelByName(name);
             await Clients.All.SendAsync("CreateChannel", channel);
+        }
+
+        public async Task AddProfUserChannel(User x)
+        {
+            // TODO: handle adding members to a channel
+            // all users can see new channels for now, this should be fixed
+            string chName = x.Name.Replace(' ', '-');
+            Channel channel = await Database.GetChannelByName(chName);
+            if (channel != null) { return; }
+            string members = "1," + x.Id;
+            await Database.AddChannel(chName, false, members);
+            // after creating the channel in the database, get its row id to be sent back
+            channel = await Database.GetChannelByName(chName);
+            await Clients.All.SendAsync("CreateChannel", channel);
+        }
+
+        public async Task RequestUsersInChannel(int channelId)
+        {
+            // edge case, 0 is the default channel which isnt in the database and everyone can see
+            // so just return everyone
+            if (channelId == 0)
+            {
+                await Clients.Caller.SendAsync("SyncChannelUsers", "1,2,3,4,5,6,7,8,9,10,11");
+            }
+            else
+            {
+                Channel channel = await Database.GetChannelById(channelId);
+                await Clients.Caller.SendAsync("SyncChannelUsers", channel.Members);
+            }
+        }
+
+        public async Task DeleteChannel(string channelName)
+        {
+            // prevent deleting the default chat room
+            if (channelName == "open-chat")
+                return;
+            Channel channel = await Database.GetChannelByName(channelName);
+            if (channel != null)
+            {
+                // delete the chat room and the messages that were in the chat room
+                await Database.DeleteChannel(channel.Id);
+                await Database.DeleteMessagesInChannel(channel.Id);
+                await Clients.All.SendAsync("RemoveChannel", channel);
+            }
         }
     }
 }

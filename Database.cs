@@ -1,7 +1,6 @@
 ﻿using Microsoft.Data.Sqlite;
 using Dapper;
 using BlackboardChat.Data;
-using System.Collections.Concurrent;
 
 namespace BlackboardChat
 {
@@ -11,13 +10,13 @@ namespace BlackboardChat
         private static readonly string name = "Data Source=BlackboardChat.sqlite";
 
         // create all required tables on startup
-        public static void Setup()
+        public static async void Setup()
         {
             using var connection = new SqliteConnection(name);
             // create the Users table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Users ("
                 + "Id INTEGER PRIMARY KEY,"
-                + "Name VARCHAR(100) NOT NULL,"
+                + "Name VARCHAR(100) UNIQUE NOT NULL,"
                 + "IsProfessor TINYINT NOT NULL);");
 
             // create the Messages table if it doesn't already exist
@@ -39,17 +38,22 @@ namespace BlackboardChat
 
             // removes all existing channels for testing purposes
             // comment this out if you want to keep the channels made
-            connection.Execute("DELETE FROM Channels");
+            //connection.Execute("DELETE FROM Channels");
 
             // removes all existing messages for testing purposes
             // comment this out if you want to keep the messages sent
-            connection.Execute("DELETE FROM Messages");
+            //connection.Execute("DELETE FROM Messages");
 
             // if the default channel doesn't exist, add it to the databsae
             // we can shortcut here since we know how big our class is and their ids
             // realistically everyone would have to be dynamically added
             connection.Execute("INSERT OR IGNORE INTO Channels (Name, IsForum, Members)" +
                 "VALUES ('open-chat', 0, '1,2,3,4,5,6,7,8,9,10,11');");
+
+            if ((await GetAllUsers()).Count() < 11)
+            {
+                await AddDummyUsers();
+            }
         }
 
         // adds a user to the database
@@ -86,7 +90,7 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             var parameters = new { Name = channelName };
-            return await connection.QuerySingleAsync<Channel>("SELECT * FROM Channels WHERE Name = @Name", parameters);
+            return await connection.QueryFirstOrDefaultAsync<Channel>("SELECT * FROM Channels WHERE Name = @Name", parameters);
         }
 
         // search for a user by their id
@@ -94,7 +98,15 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             var parameters = new { Id = id };
-            return await connection.QuerySingleAsync<User>("SELECT * FROM Users WHERE rowid = @Id", parameters);
+            return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM Users WHERE rowid = @Id", parameters);
+        }
+
+        // search for a channel by its id
+        public static async Task<Channel> GetChannelById(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            return await connection.QueryFirstOrDefaultAsync<Channel>("SELECT * FROM Channels WHERE rowid = @Id", parameters);
         }
 
         // get the professor from the database
@@ -102,7 +114,7 @@ namespace BlackboardChat
         public static async Task<User> GetProfessor()
         {
             using var connection = new SqliteConnection(name);
-            return await connection.QuerySingleAsync<User>("SELECT * FROM Users WHERE IsProfessor = 1");
+            return await connection.QueryFirstOrDefaultAsync<User>("SELECT * FROM Users WHERE IsProfessor = 1");
         }
 
         // returns all users from the database
@@ -113,7 +125,6 @@ namespace BlackboardChat
         }
 
         // returns all channels from the database
-        // TODO: only return channels that the user can see
         public static async Task<IEnumerable<Channel>> GetAllChannels()
         {
             using var connection = new SqliteConnection(name);
@@ -127,6 +138,20 @@ namespace BlackboardChat
             using var connection = new SqliteConnection(name);
             var parameters = new { Id = id };
             return await connection.QueryAsync<Message>("SELECT * FROM Messages WHERE Channel = @Id", parameters);
+        }
+
+        public static async Task DeleteChannel(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            await connection.ExecuteAsync("DELETE FROM Channels WHERE rowid = @Id", parameters);
+        }
+
+        public static async Task DeleteMessagesInChannel(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            await connection.ExecuteAsync("DELETE FROM Messages WHERE Channel = @Id", parameters);
         }
 
         // creates a dummy class list with one professor and 10 students
@@ -143,7 +168,6 @@ namespace BlackboardChat
             await AddUser("Ariana Larson", false);
             await AddUser("Hannah Cooper", false);
             await AddUser("James Walker", false);
-            Console.WriteLine("Dummy Users Generated. Please do not call this function again unless necessary!");
         }
     }
 }

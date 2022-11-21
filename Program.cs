@@ -35,11 +35,4 @@ app.MapHub<Server>("/chat");
 
 Database.Setup();
 
-// ***IMPORTANT***
-// please only uncomment this if your database doesn't have any dummy users
-// and you need to create them
-// after creating the dummy users, make sure to recomment this line!
-
-//await Database.AddDummyUsers();
-
 app.Run();
