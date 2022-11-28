@@ -19,7 +19,6 @@ document.getElementById("messageInput").disabled = true;
 document.getElementById("addChannel").hidden = true;
 
 // hide the open log button until the user is the professor (temp)
-document.getElementById("settingsDropdown").hidden = true;
 document.getElementById("studentSettings").hidden = true;
 
 //Hide the request 1-on-1 button until the user is a student
@@ -146,7 +145,6 @@ connection.on("LoginSuccessful", function (user) {
 
     if (localUser.isProfessor) {
         document.getElementById("addChannel").hidden = false;
-        document.getElementById("settingsDropdown").hidden = false;
     }
 
     if (!localUser.isProfessor) {

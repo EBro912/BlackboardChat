@@ -13,20 +13,41 @@
         <nav id="navbar">
 
             <!-- Professor settings -->
-            <div class="dropdown" id="settingsDropdown">
-                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                             Settings
-                        </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenu">
-                            <button class="dropdown-item" type="button">Open log</button>
-                            <button class="dropdown-item" type="button" onclick="addUserToChannel()">Add user(s) to chat room</button>
-                            <button class="dropdown-item" type="button" onclick="removeUserFromChannel()">Remove user(s) from chat room</button>
-                            <button class="dropdown-item" type="button">Mute user(s)</button>
-                            <button class="dropdown-item" type="button">Unmute user(s)</button>
-                            <button class="dropdown-item btn-danger" type="button" onclick="deleteChannel()">Delete Chatroom</button>
-                            <button class="dropdown-item btn-danger" type="button">Delete messages</button>
-                         </div>
-           </div>
+            <!--break without this for some reason-->
+            <div class="dropdown" id="settingsDropdown"></div>
+
+            <div class="modal" tabindex="-1" role="dialog" id="settingsModal">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Settings</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <button class="btn-primary" type="button">Open log</button>
+                            <button class="btn-primary" type="button" onclick="addUserToChannel()">Add user(s) to chat room</button>
+                            <button class="btn-primary" type="button" onclick="removeUserFromChannel()">Remove user(s) from chat room</button>
+                            <button class="btn-primary" type="button">Mute user(s)</button>
+                            <button class="btn-primary" type="button">Unmute user(s)</button>
+                            <button class="btn-danger" type="button" onclick="deleteChannel()">Delete Chatroom</button>
+                            <button class="btn-danger" type="button">Delete messages</button>
+
+                            <!--Use this template for checkboxes.-->
+                            <br />
+                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                            <label class="form-check-label" for="flexCheckDefault" style="color: black">
+                                For future references
+                            </label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-dismiss="modal">Confirm</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
            <!-- Student settings -->
             <div class="dropdown" id="studentSettings">
@@ -40,6 +61,7 @@
          
             <!-- Buttons to add/request chats -->
             <div id="buttonlist" class="btn-group-justified btn-group-vertical">
+                <button type="button" class="btn btn-warning" id="profSettings" data-toggle="modal" data-target="#settingsModal">Settings</button>
                 <button type="button" class="btn btn-info" id="channelID_0" onclick="changeChannel(0)" disabled>open-chat</button>
                 <button type="button" class="btn btn-outline-success" id="addChannel">Add Chat Room</button>
                 <button type="button" class="btn btn-outline-success" id="requestChat">Request One-on-One</button>
