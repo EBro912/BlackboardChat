@@ -6,9 +6,11 @@ var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 // prevents us from having to ping the database every time we need to retrieve a user
 // in the real world, students can drop the class but we dont have to worry about that here
 var userCache = [];
-
 // the client's current channel ID
 var channelID = 0;
+// a list of users that can see the current channel
+// used to make some calculations easier
+var channelUserCache = "";
 // the client's user object, including their user ID, name, and if they are a professor
 var localUser = null;
 
@@ -61,7 +63,7 @@ connection.on("ReceiveMessage", function (channel, user, message) {
 
 connection.on("CreateChannel", function (channel) {
     // if we already have access to the channel, then skip it
-    if (document.getElementById(`channelID_${channel.id}`))
+    if ($(`#channelID_${channel.id}`).length)
         return;
     // convert the database's member storage into an actual array of user IDs
     // and check if we actually have permission to see this channel
@@ -73,19 +75,24 @@ connection.on("CreateChannel", function (channel) {
 connection.on("RemoveChannel", function (channel) {
     // only attempt to delete the channel if the user has access to it
     if (channel.members.split(',').includes(localUser.id.toString())) {
-        document.getElementById(`channelID_${channel.id}`).remove();       
+        $(`#channelID_${channel.id}`).remove();
     }
 });
 
-// helper function to make removing certain users from channels easier
-connection.on("RemoveChannelForId", function (channel, id) {
-    // only attempt to delete the channel if our id matches the requsted id
-    if (localUser.id === id) {
-        // if the user is viewing the channel they are being removed from, force them to change to the default channel
-        if (channelID === channel.id) {
+connection.on("UpdateChannel", function (channel) {
+    if (localUser.isProfessor) return;
+    if (channel.members.split(',').includes(localUser.id.toString())) {
+        // if we can already see the channel then do nothing
+        if ($(`#channelID_${channel.id}`).length)
+            return;
+        addChannel(channel.id, channel.name);
+    }
+    else {
+        if ($(`#channelID_${channel.id}`).length) {
+            // change back to the default channel if we get removed
             changeChannel(0);
+            $(`#channelID_${channel.id}`).remove();
         }
-        document.getElementById(`channelID_${channel.id}`).remove();
     }
 });
 
@@ -97,6 +104,7 @@ connection.on("SyncChannelMessages", function (messages) {
 });
 
 connection.on("SyncChannelUsers", function (users) {
+    channelUserCache = users;
     const userList = document.getElementById("usersShown");
     users.split(',').forEach(x => {
         var li = document.createElement("li");
@@ -199,26 +207,6 @@ function deleteChannel() {
     });
 }
 
-function addUserToChannel() {
-    //TODO: Make a modal popup from button press with checkbox of students
-
-    let name = prompt("Enter the name of the user to add to the channel");
-    if (name === null)
-        return;
-    connection.invoke("AddUserToChannel", channelID, name).catch(function (err) {
-        return console.error(err.toString());
-    });
-}
-
-function removeUserFromChannel() {
-    let name = prompt("Enter the name of the user to remove from the channel");
-    if (name === null)
-        return;
-    connection.invoke("RemoveUserFromChannel", channelID, name).catch(function (err) {
-        return console.error(err.toString());
-    });
-}
-
 const input = document.getElementById("messageInput");
 input.addEventListener("keyup", function (event) {
     if (event.key === "Enter") {
@@ -237,6 +225,14 @@ input.addEventListener("keyup", function (event) {
 $(document).ready(function () {
     $('#addChannel').on('click', function (e) {
         $('#addChannelModal').modal('toggle');
+    });
+
+    $('#editUsers').on('click', function (e) {
+        if (channelID == 0) {
+            alert("The default channel user list may not be edited.");
+            return;
+        }
+        $('#editUsersModal').modal('toggle');
     });
 
     $('#addChannelModal').on('show.bs.modal', function (e) {     
@@ -261,6 +257,22 @@ $(document).ready(function () {
         });
     });
 
+    $('#editUsersModal').on('show.bs.modal', function (e) {
+        $('#editInputHolder').empty();
+        let users = channelUserCache.split(',').map(Number);
+        console.log(users);
+        userCache.forEach(x => {
+            if (x.isProfessor) return;
+            $('#editInputHolder').append($(`
+            <div class="form-check">
+               <input class="form-check-input" type="checkbox" value="" id="user${x.id}" ${users.includes(x.id) ? "checked" : ""}>
+               <label class="form-check-label" for="user${x.id}" style="color: black">
+                   ${x.name}
+               </label>
+            </div>`));
+        });
+    });
+
     $('#confirmCreate').on('click', function (e) {
         let name = $('#roomName').val();
         if (name === null)
@@ -273,18 +285,34 @@ $(document).ready(function () {
         // professor is always included
         var users = ['1'];
         $('#createInputHolder input:checked').each(function () {
-            users.push($(this).attr('id').substring(4))
+            users.push($(this).attr('id').substring(4));
         });
         connection.invoke("AddChannel", name, users).catch(function (err) {
+            return console.error(err.toString());
+        });
+    });
+
+    $('#confirmEdit').on('click', function (e) {
+        var add = [];
+        var remove = [];
+        console.log("clicked");
+        $('#editInputHolder input').each(function () {
+            let id = $(this).attr('id').substring(4);
+            if ($(this).is(':checked')) {
+                add.push(id);
+            }
+            else {
+                remove.push(id);
+            }
+        });
+        connection.invoke("UpdateUsersInChannel", channelID, add, remove).catch(function (err) {
             return console.error(err.toString());
         });
     });
 });
 
 
-
-const request = document.getElementById("requestChat");
-request.addEventListener("click", function (event) {
+$('requestChat').on("click", function (event) {
     connection.invoke('AddProfUserChannel', localUser).catch(function (err){
         return console.error(err.toString());
     });
