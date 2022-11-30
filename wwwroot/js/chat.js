@@ -234,21 +234,53 @@ input.addEventListener("keyup", function (event) {
     }
 });
 
-//Needs to be edited to work with checkboxes
-const add = document.getElementById("addChannel");
-add.addEventListener("click", function (event) {
-    let name = prompt("Enter a name for the new channel");
-    if (name === null)
-        return;
-    name = name.replaceAll(' ', '-');
-    if (name.length > 50) {
-        alert("Channel name must be shorter than 50 characters.");
-        return;
-    }
-    connection.invoke("AddChannel", name).catch(function (err) {
-        return console.error(err.toString());
+$(document).ready(function () {
+    $('#addChannel').on('click', function (e) {
+        $('#addChannelModal').modal('toggle');
+    });
+
+    $('#addChannelModal').on('show.bs.modal', function (e) {     
+        $('#createInputHolder').empty();
+        $('#createInputHolder').append($(`
+           <div class="form-group">
+              <label for="roomName" style="color: black">
+                   Room Name
+              </label>
+              <input type="text" class="form-control" value="" id="roomName">
+            </div>
+            `));
+        userCache.forEach(x => {
+            if (x.isProfessor) return;
+            $('#createInputHolder').append($(`
+            <div class="form-check">
+               <input class="form-check-input" type="checkbox" value="" id="user${x.id}">
+               <label class="form-check-label" for="user${x.id}" style="color: black">
+                   ${x.name}
+               </label>
+            </div>`));
+        });
+    });
+
+    $('#confirmCreate').on('click', function (e) {
+        let name = $('#roomName').val();
+        if (name === null)
+            return;
+        name = name.replaceAll(' ', '-');
+        if (name.length > 50) {
+            alert("Channel name must be shorter than 50 characters.");
+            return;
+        }
+        // professor is always included
+        var users = ['1'];
+        $('#createInputHolder input:checked').each(function () {
+            users.push($(this).attr('id').substring(4))
+        });
+        connection.invoke("AddChannel", name, users).catch(function (err) {
+            return console.error(err.toString());
+        });
     });
 });
+
 
 
 const request = document.getElementById("requestChat");

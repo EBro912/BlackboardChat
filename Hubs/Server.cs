@@ -39,13 +39,11 @@ namespace BlackboardChat.Hubs
             await Clients.Caller.SendAsync("SyncChannels", channels.ToList());
         }
 
-        public async Task AddChannel(string name)
+        public async Task AddChannel(string name, string[] members)
         {
-            // TODO: handle adding members to a channel
-            // all users can see new channels for now, this should be fixed
             Channel channel = await Database.GetChannelByName(name);
             if (channel != null) { return; }
-            await Database.AddChannel(name, false, "1,2,3,4,5,6,7,8,9,10,11");
+            await Database.AddChannel(name, false, string.Join(',', members));
             // after creating the channel in the database, get its row id to be sent back
             channel = await Database.GetChannelByName(name);
             await Clients.All.SendAsync("CreateChannel", channel);
