@@ -12,11 +12,11 @@
     <div class="col-3">
         <nav id="navbar">
 
-            <!-- Professor settings -->
             <!--break without this for some reason-->
             <div class="dropdown" id="settingsDropdown"></div>
 
-            <div class="modal" tabindex="-1" role="dialog" id="settingsModal">
+            <!-- Professor settings -->
+            <div class="modal" tabindex="-1" role="dialog" id="professorSettings">
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
@@ -25,46 +25,236 @@
                                 <span aria-hidden="true">&times;</span>
                             </button>
                         </div>
+                        <!--Add id for modal-body as needed for all modals on page->
                         <div class="modal-body">
-                            <button class="btn-primary" type="button">Open log</button>
-                            <button class="btn-primary" type="button" onclick="addUserToChannel()">Add user(s) to chat room</button>
-                            <button class="btn-primary" type="button" onclick="removeUserFromChannel()">Remove user(s) from chat room</button>
-                            <button class="btn-primary" type="button">Mute user(s)</button>
-                            <button class="btn-primary" type="button">Unmute user(s)</button>
-                            <button class="btn-danger" type="button" onclick="deleteChannel()">Delete Chatroom</button>
-                            <button class="btn-danger" type="button">Delete messages</button>
+                            <button class="btn-primary" type="button" data-toggle="modal" href="#logTest">Open log</button>
+                            <button class="btn-primary" type="button" onclick="addUserToChannel()" data-toggle="modal" href="#addUsers">Add user(s) to chat room</button>
+                            <button class="btn-primary" type="button" onclick="removeUserFromChannel()" data-toggle="modal" href="#removeUsers">Remove user(s) from chat room</button>
+                            <button class="btn-primary" type="button" data-toggle="modal" href="#muteUsers">Mute user(s)</button>
+                            <button class="btn-primary" type="button" data-toggle="modal" href="#unmuteUsers">Unmute user(s)</button>
+                            <button class="btn-danger" type="button" onclick="deleteChannel()" data-toggle="modal" href="#deleteChannel">Delete Chatroom</button>
 
-                            <!--Use this template for checkboxes.-->
+                            <!--Rework to x instead of button-->
+                            <button class="btn-danger" type="button">Delete messages</button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#settingsModal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Log UI modal-->
+            <div class="modal" id="logTest" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="logScrollTest">Log</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body" style="color: black">
+                            Im the log hi
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" href="">Close</button> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Add users checkbox modal-->
+            <div class="modal" id="addUsers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Add users</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!--Use this template for each person within chatroom
+                                Start-->
+                            <input class="form-check-input" type="checkbox" value="" id="check1">
+                            <label class="form-check-label" for="check1" style="color: black">
+                                user 1
+                            </label>
                             <br />
-                            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
-                            <label class="form-check-label" for="flexCheckDefault" style="color: black">
-                                For future references
+                            <!--End-->
+
+                            <input class="form-check-input" type="checkbox" value="" id="check2">
+                            <label class="form-check-label" for="check2" style="color: black">
+                                user 2
+                            </label>
+                            <br />
+
+                            <input class="form-check-input" type="checkbox" value="" id="check3">
+                            <label class="form-check-label" for="check3" style="color: black">
+                                user 3
+                            </label>
+                            <br />
+
+                            <input class="form-check-input" type="checkbox" value="" id="check4">
+                            <label class="form-check-label" for="check4" style="color: black">
+                                user 4
                             </label>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-success" data-dismiss="modal">Confirm</button>
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-success" data-dismiss="modal" href="#checkboxTesting">Confirm</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" href="#checkboxTesting">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#checkboxTesting">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Remove users checkbox modal-->
+            <div class="modal" id="removeUsers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Remove user</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input class="form-check-input" type="checkbox" value="" id="check1">
+                            <label class="form-check-label" for="check1" style="color: black">
+                                user 1
+                            </label>
+                            <br />
+
+                            <input class="form-check-input" type="checkbox" value="" id="check4">
+                            <label class="form-check-label" for="check4" style="color: black">
+                                user 7
+                            </label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-dismiss="modal" href="#checkboxTesting">Confirm</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" href="#checkboxTesting">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#checkboxTesting">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Mute users modal-->
+            <div class="modal" id="muteUsers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Remove user</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input class="form-check-input" type="checkbox" value="" id="check1">
+                            <label class="form-check-label" for="check1" style="color: black">
+                                user 1
+                            </label>
+                            <br />
+
+                            <input class="form-check-input" type="checkbox" value="" id="check4">
+                            <label class="form-check-label" for="check4" style="color: black">
+                                user 7
+                            </label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-dismiss="modal" href="#checkboxTesting">Confirm</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" href="#checkboxTesting">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#checkboxTesting">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Unmute users modal-->
+            <div class="modal" id="unmuteUsers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Remove user</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input class="form-check-input" type="checkbox" value="" id="check1">
+                            <label class="form-check-label" for="check1" style="color: black">
+                                user 1
+                            </label>
+                            <br />
+
+                            <input class="form-check-input" type="checkbox" value="" id="check4">
+                            <label class="form-check-label" for="check4" style="color: black">
+                                user 7
+                            </label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-dismiss="modal" href="#checkboxTesting">Confirm</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" href="#checkboxTesting">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#checkboxTesting">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Delete channel modal-->
+            <div class="modal" id="deleteChannel" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Remove user</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <input class="form-check-input" type="checkbox" value="" id="check1">
+                            <label class="form-check-label" for="check1" style="color: black">
+                                user 1
+                            </label>
+                            <br />
+
+                            <input class="form-check-input" type="checkbox" value="" id="check4">
+                            <label class="form-check-label" for="check4" style="color: black">
+                                user 7
+                            </label>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-success" data-dismiss="modal" href="#checkboxTesting">Confirm</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal" href="#checkboxTesting">Cancel</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#checkboxTesting">Close</button>
                         </div>
                     </div>
                 </div>
             </div>
 
            <!-- Student settings -->
-            <div class="dropdown" id="studentSettings">
-                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Settings
-                </button>
-                <div class="dropdown-menu" aria-labelledby="dropdownMenu">
-                    <button class="dropdown-item" type="button">Delete own messages</button>
+            <div class="modal" tabindex="-1" id="studentSettings">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Settings</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <button type="button" class="btn btn-outline-success" id="requestChat">Request One-on-One</button>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#settingsModal">Close</button>
+                        </div>
+                    </div>
                 </div>
             </div>
          
-            <!-- Buttons to add/request chats -->
+            <!--Buttons to interact with settings and display channels-->
             <div id="buttonlist" class="btn-group-justified btn-group-vertical">
-                <button type="button" class="btn btn-warning" id="profSettings" data-toggle="modal" data-target="#settingsModal">Settings</button>
+                <!--Settings buttons for student and professor-->
+                <button type="button" class="btn btn-warning" id="profSettings" data-toggle="modal" href="#professorSettings">Settings</button>
+                <button type="button" class="btn btn-warning" id="studSettings" data-toggle="modal" href="#studentSettings">Settings</button>
+
                 <button type="button" class="btn btn-info" id="channelID_0" onclick="changeChannel(0)" disabled>open-chat</button>
+
+                <!--TODO: Move buttons to the settings buttons-->
                 <button type="button" class="btn btn-outline-success" id="addChannel">Add Chat Room</button>
-                <button type="button" class="btn btn-outline-success" id="requestChat">Request One-on-One</button>
+                
            </div>
         </nav>
     </div>

@@ -18,9 +18,6 @@ document.getElementById("messageInput").disabled = true;
 // hide the add channel button until the user is the professor
 document.getElementById("addChannel").hidden = true;
 
-// hide the open log button until the user is the professor (temp)
-document.getElementById("studentSettings").hidden = true;
-
 //Hide the request 1-on-1 button until the user is a student
 document.getElementById("requestChat").hidden = true;
 
@@ -149,7 +146,6 @@ connection.on("LoginSuccessful", function (user) {
 
     if (!localUser.isProfessor) {
         document.getElementById("requestChat").hidden = false;
-        document.getElementById("studentSettings").hidden = false;
     }
 });
    
@@ -204,6 +200,8 @@ function deleteChannel() {
 }
 
 function addUserToChannel() {
+    //TODO: Make a modal popup from button press with checkbox of students
+
     let name = prompt("Enter the name of the user to add to the channel");
     if (name === null)
         return;
@@ -236,6 +234,7 @@ input.addEventListener("keyup", function (event) {
     }
 });
 
+//Needs to be edited to work with checkboxes
 const add = document.getElementById("addChannel");
 add.addEventListener("click", function (event) {
     let name = prompt("Enter a name for the new channel");
@@ -258,4 +257,3 @@ request.addEventListener("click", function (event) {
         return console.error(err.toString());
     });
 });
-

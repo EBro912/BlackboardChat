@@ -121,3 +121,7 @@ nav {
 .users:hover {
     background-image: linear-gradient(teal, blue);
 }
+
+.modal-header {
+    color: black;
+}
