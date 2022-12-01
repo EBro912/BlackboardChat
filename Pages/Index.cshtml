@@ -200,8 +200,8 @@
                     </div>
 
                     <!-- Student settings -->
-                    <div class="modal" tabindex="-1" id="studentSettings">
-                        <div class="modal-dialog">
+                    <div class="modal" tabindex="-1" role="dialog" id="studentSettings">
+                        <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title">Settings</h5>
@@ -210,10 +210,10 @@
                                     </button>
                                 </div>
                                 <div class="modal-body">
-                                    <button type="button" class="btn btn-outline-success" id="requestChat">Request One-on-One</button>
+                                    <button type="button" class="btn btn-outline-success" id="requestChat" data-dismiss="modal" data-toggle="modal" href="#settingsModal">Request One-on-One</button>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#settingsModal">Close</button>
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal" data-toggle="modal" href="#settingsModal">Close</button>
                                 </div>
                             </div>
                         </div>

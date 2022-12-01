@@ -23,6 +23,9 @@ document.getElementById("addChannel").hidden = true;
 //Hide the request 1-on-1 button until the user is a student
 document.getElementById("requestChat").hidden = true;
 
+document.getElementById("studSettings").hidden = true;
+document.getElementById("profSettings").hidden = true;
+
 
 // Helper function to display a message
 function addMessage(channel, user, message) {
@@ -31,14 +34,11 @@ function addMessage(channel, user, message) {
     if (channel === channelID) {
         var isLocalUser = user === localUser.id;
         var msg = `${isLocalUser ? "You" : userCache.at(user - 1).name}: ${message}`
-
-        console.log("does this even work");
-        var messagebox = $("<div><input type='radio' name='radiodel' class='radiodel'><br></input><text class = 'message'>" + msg + " </text></div > ")
+        var messagebox = $("<text class = 'message'>" + msg + " </text>")
         messagebox.attr('id', isLocalUser ? 'user' : 'otheruser');
         // append message box and break
         var chat = $("#chatbox");
         chat.append(messagebox)
-
     }
 }
 
@@ -158,12 +158,12 @@ connection.on("LoginSuccessful", function (user) {
 
     if (localUser.isProfessor) {
         document.getElementById("addChannel").hidden = false;
-        document.getElementById("studSettings").hidden = true;
+        document.getElementById("profSettings").hidden = false;
     }
 
     if (!localUser.isProfessor) {
         document.getElementById("requestChat").hidden = false;
-        document.getElementById("profSettings").hidden = true;
+        document.getElementById("studSettings").hidden = false;
     }
 });
    
@@ -217,22 +217,22 @@ function deleteChannel() {
     });
 }
 
-const input = document.getElementById("messageInput");
-input.addEventListener("keyup", function (event) {
-    if (event.key === "Enter") {
-        var message = input.value;
-        if (message !== "") {
-            connection.invoke("SendMessage", channelID, localUser.id, message).catch(function (err) {
-                return console.error(err.toString());
-            });
-            // reset the input box when a message is sent
-            input.value = "";
-            event.preventDefault();
-        }
-    }
-});
 
 $(document).ready(function () {
+    $('#messageInput').on("keyup", function (event) {
+        if (event.key === "Enter") {
+            var message = input.value;
+            if (message !== "") {
+                connection.invoke("SendMessage", channelID, localUser.id, message).catch(function (err) {
+                    return console.error(err.toString());
+                });
+                // reset the input box when a message is sent
+                input.value = "";
+                event.preventDefault();
+            }
+        }
+    });
+
     $('#addChannel').on('click', function (e) {
         $('#addChannelModal').modal('toggle');
     });
@@ -319,11 +319,11 @@ $(document).ready(function () {
             return console.error(err.toString());
         });
     });
-});
 
-
-$('requestChat').on("click", function (event) {
-    connection.invoke('AddProfUserChannel', localUser).catch(function (err){
-        return console.error(err.toString());
+    $('#requestChat').on("click", function (event) {
+        connection.invoke('AddProfUserChannel', localUser).catch(function (err) {
+            return console.error(err.toString());
+        });
     });
 });
+
