@@ -32,17 +32,25 @@ function addMessage(channel, user, message) {
         var isLocalUser = user === localUser.id;
         var msg = `${isLocalUser ? "You" : userCache.at(user - 1).name}: ${message}`
 
-        // create message box with users message
-        var messagebox = document.createElement('text');
-        messagebox.setAttribute('class', 'message');
-        messagebox.setAttribute('id', isLocalUser ? 'user' : 'otheruser');
-        messagebox.textContent = msg;
-
+        console.log("does this even work");
+        var messagebox = $("<div><input type='radio' name='radiodel' class='radiodel'><br></input><text class = 'message'>" + msg + " </text></div > ")
+        messagebox.attr('id', isLocalUser ? 'user' : 'otheruser');
         // append message box and break
-        var chat = document.getElementById('chatbox');
-        chat.appendChild(messagebox);
+        var chat = $("#chatbox");
+        chat.append(messagebox)
+
     }
 }
+
+// event handling for delete message clikc
+$(".radiodel").on("change", function () {
+    console.log("clicked");
+    var message = $(this).closest("div");
+    message.remove();
+});
+
+
+
 
 // Helper function to create a channel
 function addChannel(id, name) {
