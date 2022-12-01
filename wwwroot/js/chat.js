@@ -150,10 +150,12 @@ connection.on("LoginSuccessful", function (user) {
 
     if (localUser.isProfessor) {
         document.getElementById("addChannel").hidden = false;
+        document.getElementById("studSettings").hidden = true;
     }
 
     if (!localUser.isProfessor) {
         document.getElementById("requestChat").hidden = false;
+        document.getElementById("profSettings").hidden = true;
     }
 });
    
