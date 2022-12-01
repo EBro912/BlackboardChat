@@ -78,12 +78,12 @@ namespace BlackboardChat.Hubs
             }
         }
 
-        public async Task DeleteChannel(string channelName)
+        public async Task DeleteChannel(int channelID)
         {
             // prevent deleting the default chat room
-            if (channelName == "open-chat")
+            if (channelID == 0)
                 return;
-            Channel channel = await Database.GetChannelByName(channelName);
+            Channel channel = await Database.GetChannelById(channelID);
             if (channel != null)
             {
                 // delete the chat room and the messages that were in the chat room

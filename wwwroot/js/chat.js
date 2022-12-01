@@ -83,6 +83,9 @@ connection.on("CreateChannel", function (channel) {
 connection.on("RemoveChannel", function (channel) {
     // only attempt to delete the channel if the user has access to it
     if (channel.members.split(',').includes(localUser.id.toString())) {
+        // if we are looking at the channel, then change channels
+        if (channelID === channel.id)
+            changeChannel(0);
         $(`#channelID_${channel.id}`).remove();
     }
 });
@@ -207,12 +210,8 @@ function changeChannel(id) {
     });
 }
 
-// TODO: convert this to a popup/dropdown that lets the user select a channel to delete
-function deleteChannel() {
-    let name = prompt("Enter the name of the channel to delete");
-    if (name === null)
-        return;
-    connection.invoke("DeleteChannel", name).catch(function (err) {
+function deleteChannel(id) {
+    connection.invoke("DeleteChannel", id).catch(function (err) {
         return console.error(err.toString());
     });
 }
@@ -239,7 +238,7 @@ $(document).ready(function () {
 
     $('#editUsers').on('click', function (e) {
         if (channelID == 0) {
-            alert("The default channel user list may not be edited.");
+            alert("The default chat room user list may not be edited.");
             return;
         }
         $('#editUsersModal').modal('toggle');
@@ -281,6 +280,18 @@ $(document).ready(function () {
                </label>
             </div>`));
         });
+    });
+
+    $('#deleteChatroom').on('click', function (e) {
+        if (channelID == 0) {
+            alert("The default chat room may not be deleted.");
+            return;
+        }
+        $('#deleteChatroomModal').modal('toggle');
+    });
+
+    $('#confirmDelete').on('click', function (e) {
+        deleteChannel(channelID);
     });
 
     $('#confirmCreate').on('click', function (e) {
