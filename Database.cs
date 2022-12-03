@@ -200,6 +200,15 @@ namespace BlackboardChat
             await connection.ExecuteAsync("UPDATE Channels SET Members = @Members WHERE rowid = @Id", parameters);
         }
 
+        //adds muted members locally to channel list(string) of muted members
+        public static async Task UpdateChannelMutedMembers(int id, string members)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id, Members = members };
+            await connection.ExecuteAsync("UPDATE Channels SET MutedMembers = @Members WHERE rowid = @Id ", parameters);
+        }
+
+
         // creates a dummy class list with one professor and 10 students
         public static async Task AddDummyUsers()
         {

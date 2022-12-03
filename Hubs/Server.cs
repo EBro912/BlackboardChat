@@ -133,5 +133,30 @@ namespace BlackboardChat.Hubs
                 await Clients.All.SendAsync("UpdateChannel", channel);
             }
         }
-    }
+
+        public async Task UpdateMutedUsersInChannel(int channelId, string[] add, string[] remove)
+        {
+            Channel channel = await Database.GetChannelById(channelId);
+            if (channel != null)
+            {
+                List<string> MutedMembers = channel.MutedMembers.Split(',').ToList();
+                foreach (string s in add)
+                {
+                    if (!MutedMembers.Contains(s))
+                    {
+                        MutedMembers.Add(s);
+                    }
+                }
+                foreach (string s in remove)
+                {
+                    MutedMembers.Remove(s);
+                }
+                string updated = string.Join(',', MutedMembers);
+                channel.MutedMembers = updated;
+                await Database.UpdateChannelMutedMembers(channel.Id, updated);
+                await Clients.All.SendAsync("UpdateChannel", channel);
+            }
+        }
+
+        }
 }
