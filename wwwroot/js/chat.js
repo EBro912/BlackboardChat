@@ -32,7 +32,7 @@ function addMessage(message) {
     // TODO (maybe): some sort of notification/unread system for other channels
     if (message.channel === channelID) {
         var isLocalUser = message.author === localUser.id;
-        var sender = (isLocalUser ? 'You' : userCache.at(message.author - 1).name) + ": ";
+        var sender = (isLocalUser ? 'You' : userCache.at(message.author - 1).name);
 
         // create div for message
         var messagebox = $("<div class ='messagediv' id ='message'></div>");
