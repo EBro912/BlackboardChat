@@ -300,7 +300,7 @@ function deleteChannel(id) {
 $(document).ready(function () {
     $('#messageInput').on("keyup", function (event) {
         if (event.key === "Enter") {
-            var message = $("#messageInput").val();
+            var message = $("#messageInput").val().trim();
             if (message !== "") {
                 connection.invoke("SendMessage", channelID, localUser.id, message).catch(function (err) {
                     return console.error(err.toString());
