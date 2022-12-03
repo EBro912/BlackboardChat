@@ -26,7 +26,6 @@ document.getElementById("requestChat").hidden = true;
 document.getElementById("studSettings").hidden = true;
 document.getElementById("profSettings").hidden = true;
 
-
 // Helper function to display a message
 function addMessage(message) {
     // only display messages sent in the current channel
@@ -51,7 +50,7 @@ function addMessage(message) {
 
         // only append delete button to div if user is the professor
         // and if the message isn't already deleted
-        if (localUser.isProfessor && !message.isDeleted) {
+        if ((localUser.isProfessor && !message.isDeleted) || (message.author === localUser.id && !message.isDeleted)) {
             // create button to allow message deletion
             var deletebutton = document.createElement('input');
             deletebutton.setAttribute('class', 'deletebutton');
@@ -68,12 +67,24 @@ function addMessage(message) {
             messagebox.append(deletebutton);
         }
 
+        // create message sender
+        var messagesender = document.createElement('text');
+        messagesender.setAttribute('class', 'messagesender');
+        messagesender.innerText = sender;
+
+        // create message header
+        var messageheader = document.createElement('text');
+        messageheader.setAttribute('class', 'messageheader');
+        messageheader.innerText = " (" + createDateString() + ") :\n";
+
         // create message text
         var messagetext = document.createElement('text');
         messagetext.setAttribute('class', 'message');
-        messagetext.innerText = sender + message.content;
+        messagetext.innerText = message.content;
 
-        // appendtext to div
+        // append button and text to div
+        messagebox.append(messagesender);
+        messagebox.append(messageheader);
         messagebox.append(messagetext);
 
         // append message box and break
@@ -82,6 +93,30 @@ function addMessage(message) {
     }
 }
 
+
+function createDateString() {
+    var datestr;
+
+    // get date for message timestamp
+    var date = new Date();
+
+    var month = date.getMonth() + 1;
+    var day = date.getDate();
+
+    var hours = date.getHours() % 12;
+    // convert to 12 hour time 
+    if (hours == 0)
+        hours = 12;
+
+    var tempmin = date.getMinutes();
+
+    var label = date.getHours() >= 12 ? 'pm' : 'am';
+    var minutes = tempmin >= 9 ? tempmin : '0' + tempmin;
+
+    datestr = month + "/" + day + " @ " + hours + ":" + minutes + label;
+
+    return datestr;
+}
 
 // Helper function to create a channel
 function addChannel(id, name) {

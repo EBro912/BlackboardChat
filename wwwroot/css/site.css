@@ -159,3 +159,11 @@ nav {
 #otheruser input {
     display:none;
 }
+
+.messageheader {
+    font-size: 12px;
+}
+
+.messagesender {
+    font-weight: 600;
+}
