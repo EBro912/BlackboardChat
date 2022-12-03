@@ -167,3 +167,9 @@ nav {
 .messagesender {
     font-weight: 600;
 }
+
+#logbody {
+    height:70vh;
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+}
