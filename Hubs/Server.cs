@@ -18,6 +18,13 @@ namespace BlackboardChat.Hubs
             await Clients.All.SendAsync("DeleteMessage", id);
         }
 
+        public async Task GloballyMuteUser(int id)
+        {
+            await Database.SetUserAsGloballyMuted(id);
+            await Clients.All.SendAsync("SetUserAsGloballyMuted", id);
+        }
+
+
         public async Task RequestChannelMessages(int id)
         {
             var messages = await Database.GetAllMessagesFromChannel(id);

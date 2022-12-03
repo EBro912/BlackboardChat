@@ -30,6 +30,9 @@ document.getElementById("profSettings").hidden = true;
 function addMessage(message) {
     // only display messages sent in the current channel
     // TODO (maybe): some sort of notification/unread system for other channels
+
+
+
     if (message.channel === channelID) {
         var isLocalUser = message.author === localUser.id;
         var sender = (isLocalUser ? 'You' : userCache.at(message.author - 1).name);
@@ -38,6 +41,8 @@ function addMessage(message) {
         var messagebox = $("<div class ='messagediv' id ='message'></div>");
         messagebox.addClass(isLocalUser ? 'user' : 'otheruser');
         messagebox.attr('id', `message_${message.id}`);
+
+        
 
         if (message.isDeleted) {
             // if the message is already deleted, then show it as deleted to the professor
@@ -48,7 +53,7 @@ function addMessage(message) {
                 return;
         }
 
-        // only append delete button to div if user is the professor
+        // only append delete button to div if user is the professor or if the user is the message author
         // and if the message isn't already deleted
         if ((localUser.isProfessor && !message.isDeleted) || (message.author === localUser.id && !message.isDeleted)) {
             // create button to allow message deletion
@@ -243,10 +248,12 @@ connection.on("LoginSuccessful", function (user) {
         document.getElementById("addChannel").hidden = false;
         document.getElementById("profSettings").hidden = false;
     }
-
     if (!localUser.isProfessor) {
         document.getElementById("requestChat").hidden = false;
         document.getElementById("studSettings").hidden = false;
+    }
+    if (localUser.IsGloballyMuted) {
+        document.getElementById("messageInput").disabled = true;
     }
 });
    
