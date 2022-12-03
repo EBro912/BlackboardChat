@@ -15,5 +15,9 @@
         // a comma separated list of user IDs that can see this channel
         // since SQL doesn't support arrays, we have to use a string to store this
         public string? Members { get; set; }
+
+        // a comma separated list of user IDs that can send messages in this channel
+        // since SQL doesn't support arrays, we have to use a string to store this
+        public string? MutedMembers { get; set; }
     }
 }

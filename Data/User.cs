@@ -9,5 +9,8 @@
         public string? Name { get; set; }
         // if the user is the professor or not
         public bool IsProfessor { get; set; }
+
+        //if the user is globally muted by professor or not
+        public bool IsGloballyMuted { get; set; }
     }
 }

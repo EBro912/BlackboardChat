@@ -100,6 +100,14 @@ namespace BlackboardChat
             var parameters = new { Id = id };
             await connection.ExecuteAsync("UPDATE Messages SET IsDeleted = 1 WHERE rowid = @Id", parameters);
         }
+        public static async Task SetUserAsMuted(string username, bool isProfessor)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Name = username, IsProfessor = isProfessor };
+            //await connection.ExecuteAsync("INSERT INTO Users (Name, IsProfessor)" +
+            //    "VALUES (@Name, @IsProfessor);", parameters);
+        }
+
 
         // gets a channel's information by its name
         public static async Task<Channel> GetChannelByName(string channelName)
