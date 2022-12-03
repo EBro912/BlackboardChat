@@ -28,9 +28,9 @@
                                 <div class="modal-body">
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#logTest">Open log</button>
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="editUsers">Edit Chat Room Users</button>
-                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#muteUsers">Mute user(s)</button>
-                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#unmuteUsers">Unmute user(s)</button>
-                                    <button class="btn btn-danger" type="button" data-dismiss="modal" data-toggle="modal" id="deleteChatroom">Delete Chatroom</button>
+                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#muteUsers">Mute/Unmute user(s)</button>
+@*                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#unmuteUsers">Unmute user(s)</button> better to have mute/unmute users
+*@                                    <button class="btn btn-danger" type="button" data-dismiss="modal" data-toggle="modal" id="deleteChatroom">Delete Chatroom</button>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal" href="#settingsModal">Close</button>
@@ -133,7 +133,8 @@
                             </div>
                         </div>
                     </div>
-
+                    
+@*                     Having a mute/unmute users in one pop-up seems cleaner
                     <!--Unmute users modal-->
                     <div class="modal" id="unmuteUsers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
@@ -163,7 +164,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div>*@
 
                     <!--Delete channel modal-->
                     <div class="modal" id="deleteChatroomModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
