@@ -82,7 +82,7 @@ nav {
 }
 
 /* messages sent by other users */
-#otheruser {
+.otheruser {
     background-color: white;
     margin-left: 5%;
     margin-right: 5%;
@@ -94,7 +94,7 @@ nav {
 }
 
 /* messages sent by current user */
-#user {
+.user {
     background-color: lightskyblue;
     margin-left: 5%;
     margin-right: 5%;
@@ -104,6 +104,11 @@ nav {
     padding: 2px;
     align-self: flex-end;
     width: fit-content;
+}
+
+/* deleted messages */
+.deleted {
+    background-color: lightcoral !important;
 }
 
 #usersShown {

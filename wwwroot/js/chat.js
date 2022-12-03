@@ -28,34 +28,52 @@ document.getElementById("profSettings").hidden = true;
 
 
 // Helper function to display a message
-function addMessage(channel, user, message) {
+function addMessage(message) {
     // only display messages sent in the current channel
     // TODO (maybe): some sort of notification/unread system for other channels
-    if (channel === channelID) {
-        var isLocalUser = user === localUser.id;
-        var sender = (isLocalUser ? 'You' : userCache.at(user - 1).name) + ": ";
+    if (message.channel === channelID) {
+        var isLocalUser = message.author === localUser.id;
+        var sender = (isLocalUser ? 'You' : userCache.at(message.author - 1).name) + ": ";
 
         // create div for message
         var messagebox = $("<div class ='messagediv' id ='message'></div>");
-        messagebox.attr('id', isLocalUser ? 'user' : 'otheruser');
+        messagebox.addClass(isLocalUser ? 'user' : 'otheruser');
+        messagebox.attr('id', `message_${message.id}`);
 
-        // create button to allow message deletion
-        var deletebutton = document.createElement('input');
-        deletebutton.setAttribute('class', 'deletebutton');
-        deletebutton.setAttribute('value', '\u{2716}');
-        deletebutton.setAttribute('type', 'button');
-        deletebutton.addEventListener('click', function () {
-            // add in log additon
-            messagebox.remove();
-        });
+        if (message.isDeleted) {
+            // if the message is already deleted, then show it as deleted to the professor
+            // for students just dont show it at all
+            if (localUser.isProfessor)
+                messagebox.addClass('deleted');
+            else
+                return;
+        }
+
+        // only append delete button to div if user is the professor
+        // and if the message isn't already deleted
+        if (localUser.isProfessor && !message.isDeleted) {
+            // create button to allow message deletion
+            var deletebutton = document.createElement('input');
+            deletebutton.setAttribute('class', 'deletebutton');
+            deletebutton.setAttribute('value', '\u{2716}');
+            deletebutton.setAttribute('type', 'button');
+            deletebutton.addEventListener('click', function () {
+                // convert message id to a number
+                let num = Number.parseInt($(this).parent().attr('id').split('_')[1]);
+                connection.invoke("RequestDeleteMessage", num).catch(function (err) {
+                    return console.error(err.toString());
+                });
+            });
+
+            messagebox.append(deletebutton);
+        }
 
         // create message text
         var messagetext = document.createElement('text');
         messagetext.setAttribute('class', 'message');
-        messagetext.innerText = sender + message;
+        messagetext.innerText = sender + message.content;
 
-        // append button and text to div
-        messagebox.append(deletebutton);
+        // appendtext to div
         messagebox.append(messagetext);
 
         // append message box and break
@@ -78,8 +96,22 @@ function addChannel(id, name) {
 }
 
 // When a message is received by the server, display it
-connection.on("ReceiveMessage", function (channel, user, message) {
-    addMessage(channel, user, message);
+connection.on("ReceiveMessage", function (message) {
+    addMessage(message);
+});
+
+connection.on("DeleteMessage", function (message) {
+    var msg = $(`#message_${message}`);
+    // if the user is the professor, then just change the message to red
+    if (localUser.isProfessor) {
+        msg.addClass('deleted');
+        // remove the delete button as the message already deleted
+        msg.children('input:first').remove();
+    }
+    // otherwise, delete the message entirely
+    else {
+        msg.remove();
+    }
 });
 
 connection.on("CreateChannel", function (channel) {
@@ -123,7 +155,7 @@ connection.on("UpdateChannel", function (channel) {
 // sync messages with the server
 connection.on("SyncChannelMessages", function (messages) {
     messages.forEach(x => {
-        addMessage(x.channel, x.author, x.content);
+        addMessage(x);
     });
 });
 

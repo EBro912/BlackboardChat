@@ -6,9 +6,16 @@ namespace BlackboardChat.Hubs
     public class Server : Hub
     {
         public async Task SendMessage(int channelID, int userID, string message)
-        {
-            await Clients.All.SendAsync("ReceiveMessage", channelID, userID, message);
+        {         
             await Database.AddMessage(channelID, userID, message, DateTime.Now);
+            Message msg = await Database.GetMostRecentMessage(userID);
+            await Clients.All.SendAsync("ReceiveMessage", msg);
+        }
+
+        public async Task RequestDeleteMessage(int id)
+        {
+            await Database.SetMessageAsDeleted(id);
+            await Clients.All.SendAsync("DeleteMessage", id);
         }
 
         public async Task RequestChannelMessages(int id)

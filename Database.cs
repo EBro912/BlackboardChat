@@ -26,7 +26,8 @@ namespace BlackboardChat
                 + "Author INT NOT NULL,"
                 // leave some extra character space just in case
                 + "Content VARCHAR(1010) NOT NULL,"
-                + "TimeStamp DATETIME NOT NULL);");
+                + "TimeStamp DATETIME NOT NULL,"
+                + "IsDeleted TINYINT(1) NOT NULL);");
 
             // create the Channels table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Channels ("
@@ -72,8 +73,8 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             var parameters = new { Channel = channel, Author = author, Content = content, TimeStamp = timestamp };
-            await connection.ExecuteAsync("INSERT INTO Messages (Channel, Author, Content, TimeStamp)" +
-                "VALUES (@Channel, @Author, @Content, @TimeStamp);", parameters);
+            await connection.ExecuteAsync("INSERT INTO Messages (Channel, Author, Content, TimeStamp, IsDeleted)" +
+                "VALUES (@Channel, @Author, @Content, @TimeStamp, 0);", parameters);
         }
 
         // inserts a new channel into the database
@@ -83,6 +84,21 @@ namespace BlackboardChat
             var parameters = new { Name = channelName, IsForum = isForum, Members = members };
             await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Members)" +
                 "VALUES (@Name, @IsForum, @Members);", parameters);
+        }
+
+        // gets a user's most recent message
+        public static async Task<Message> GetMostRecentMessage(int authorId)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Author = authorId };
+            return await connection.QueryFirstOrDefaultAsync<Message>("SELECT * FROM Messages WHERE Author = @Author ORDER BY TimeStamp DESC LIMIT 1", parameters);
+        }
+
+        public static async Task SetMessageAsDeleted(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            await connection.ExecuteAsync("UPDATE Messages SET IsDeleted = 1 WHERE rowid = @Id", parameters);
         }
 
         // gets a channel's information by its name
