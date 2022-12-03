@@ -192,6 +192,24 @@ connection.on("UpdateChannel", function (channel) {
     }
 });
 
+connection.on("SetUsersAsGloballyMuted", function (users) {
+    if (localUser.isProfessor) {
+        // update user cache for professor with newly muted users
+        connection.invoke("RequestUsers").catch(function (err) {
+            return console.error(err.toString());
+        });
+        return;
+    }
+    if (users.includes(localUser.id.toString())) {
+        document.getElementById("messageInput").placeholder = "You are globally muted!"
+        document.getElementById("messageInput").disabled = true;
+    }
+    else {
+        document.getElementById("messageInput").placeholder = "Add Message"
+        document.getElementById("messageInput").disabled = false;
+    }
+});
+
 // sync messages with the server
 connection.on("SyncChannelMessages", function (messages) {
     messages.forEach(x => {
@@ -253,6 +271,7 @@ connection.on("LoginSuccessful", function (user) {
         document.getElementById("studSettings").hidden = false;
     }
     if (localUser.IsGloballyMuted) {
+        document.getElementById("messageInput").placeholder = "You are globally muted!"
         document.getElementById("messageInput").disabled = true;
     }
 });
@@ -356,7 +375,6 @@ $(document).ready(function () {
     $('#editUsersModal').on('show.bs.modal', function (e) {
         $('#editInputHolder').empty();
         let users = channelUserCache.split(',').map(Number);
-        console.log(users);
         userCache.forEach(x => {
             if (x.isProfessor) return;
             $('#editInputHolder').append($(`
@@ -414,6 +432,34 @@ $(document).ready(function () {
             }
         });
         connection.invoke("UpdateUsersInChannel", channelID, add, remove).catch(function (err) {
+            return console.error(err.toString());
+        });
+    });
+
+    $('#muteUsersGlobally').on('click', function (e) {
+        $('#muteUsersGloballyModal').modal('toggle');
+    });
+
+    $('#muteUsersGloballyModal').on('show.bs.modal', function (e) {
+        $('#muteGloballyInputHolder').empty();
+        userCache.forEach(x => {
+            if (x.isProfessor) return;
+            $('#muteGloballyInputHolder').append($(`
+            <div class="form-check">
+               <input class="form-check-input" type="checkbox" value="" id="user${x.id}" ${x.isGloballyMuted ? "checked" : ""}>
+               <label class="form-check-label" for="user${x.id}" style="color: black">
+                   ${x.name}
+               </label>
+            </div>`));
+        });
+    });
+
+    $("#confirmMuteGlobally").on('click', function (e) {
+        var users = [];
+        $('#muteGloballyInputHolder input:checked').each(function () {
+            users.push($(this).attr('id').substring(4));
+        });
+        connection.invoke("GloballyMuteUsers", users).catch(function (err) {
             return console.error(err.toString());
         });
     });

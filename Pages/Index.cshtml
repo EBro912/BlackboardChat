@@ -28,7 +28,7 @@
                                 <div class="modal-body">
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#logTest">Open log</button>
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="editUsers">Edit Chat Room Users</button>
-                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#muteUsers">Mute/Unmute user(s)</button>
+                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="muteUsersGlobally">Mute/Unmute Users Globally</button>
 @*                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#unmuteUsers">Unmute user(s)</button> better to have mute/unmute users
 *@                                    <button class="btn btn-danger" type="button" data-dismiss="modal" data-toggle="modal" id="deleteChatroom">Delete Chatroom</button>
                                 </div>
@@ -103,32 +103,20 @@
                     </div>          
 
                   
-                    <!--Mute users modal-->
-                    <div class="modal" id="muteUsers" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <!--Mute/unmute users globally modal-->
+                    <div class="modal" id="muteUsersGloballyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Remove user</h5>
+                                    <h5 class="modal-title" id="exampleModalLabel">Mute/Unmute Users Globally</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
-                                <div class="modal-body">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="check1">
-                                        <label class="form-check-label" for="check1">
-                                            user 1
-                                        </label>
-                                    </div>
+                                <div class="modal-body" id="muteGloballyInputHolder">
 
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="check2">
-                                        <label class="form-check-label" for="check2">
-                                            user 2
-                                        </label>
-                                    </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-success" data-dismiss="modal" href="#checkboxTesting">Confirm</button>
-                                    <button type="button" class="btn btn-danger" data-dismiss="modal" href="#checkboxTesting">Cancel</button>
+                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" href="#checkboxTesting" id="confirmMuteGlobally">Confirm</button>
+                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" href="#checkboxTesting">Cancel</button>
                                 </div>
                             </div>
                         </div>

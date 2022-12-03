@@ -17,7 +17,8 @@ namespace BlackboardChat
             connection.Execute("CREATE TABLE IF NOT EXISTS Users ("
                 + "Id INTEGER PRIMARY KEY,"
                 + "Name VARCHAR(100) UNIQUE NOT NULL,"
-                + "IsProfessor TINYINT NOT NULL);");
+                + "IsProfessor TINYINT NOT NULL," 
+                + "IsGloballyMuted TINYINT(1) NOT NULL DEFAULT 0);");
 
             // create the Messages table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Messages ("
@@ -101,6 +102,11 @@ namespace BlackboardChat
             await connection.ExecuteAsync("UPDATE Messages SET IsDeleted = 1 WHERE rowid = @Id", parameters);
         }
 
+        public static async Task ResetMutes()
+        {
+            using var connection = new SqliteConnection(name);
+            await connection.ExecuteAsync("UPDATE Users SET IsGloballyMuted = 0");
+        }
 
         public static async Task SetUserAsGloballyMuted(int userId)
         {
