@@ -133,3 +133,24 @@ nav {
 .form-check-label {
     color: black;
 }
+
+.deletebutton {
+    float:right;
+    height:fit-content;
+    width:fit-content;
+    padding:0px;
+    background-color:lightgrey;
+}
+
+.messagediv input {
+    font-size:5px;
+    margin-top: 0px;
+    margin-right: 0px;
+    margin-bottom:4px;
+    margin-left:4px;
+    border:none
+}
+
+#otheruser input {
+    display:none;
+}

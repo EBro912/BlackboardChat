@@ -33,23 +33,36 @@ function addMessage(channel, user, message) {
     // TODO (maybe): some sort of notification/unread system for other channels
     if (channel === channelID) {
         var isLocalUser = user === localUser.id;
-        var msg = `${isLocalUser ? "You" : userCache.at(user - 1).name}: ${message}`
-        var messagebox = $("<text class = 'message'>" + msg + " </text>")
+        var sender = (isLocalUser ? 'You' : userCache.at(user - 1).name) + ": ";
+
+        // create div for message
+        var messagebox = $("<div class ='messagediv' id ='message'></div>");
         messagebox.attr('id', isLocalUser ? 'user' : 'otheruser');
+
+        // create button to allow message deletion
+        var deletebutton = document.createElement('input');
+        deletebutton.setAttribute('class', 'deletebutton');
+        deletebutton.setAttribute('value', '\u{2716}');
+        deletebutton.setAttribute('type', 'button');
+        deletebutton.addEventListener('click', function () {
+            // add in log additon
+            messagebox.remove();
+        });
+
+        // create message text
+        var messagetext = document.createElement('text');
+        messagetext.setAttribute('class', 'message');
+        messagetext.innerText = sender + message;
+
+        // append button and text to div
+        messagebox.append(deletebutton);
+        messagebox.append(messagetext);
+
         // append message box and break
         var chat = $("#chatbox");
         chat.append(messagebox)
     }
 }
-
-// event handling for delete message clikc
-$(".radiodel").on("change", function () {
-    console.log("clicked");
-    var message = $(this).closest("div");
-    message.remove();
-});
-
-
 
 
 // Helper function to create a channel
@@ -220,13 +233,13 @@ function deleteChannel(id) {
 $(document).ready(function () {
     $('#messageInput').on("keyup", function (event) {
         if (event.key === "Enter") {
-            var message = input.value;
+            var message = $("#messageInput").val();
             if (message !== "") {
                 connection.invoke("SendMessage", channelID, localUser.id, message).catch(function (err) {
                     return console.error(err.toString());
                 });
                 // reset the input box when a message is sent
-                input.value = "";
+                $("#messageInput").val("");
                 event.preventDefault();
             }
         }
