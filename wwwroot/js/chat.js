@@ -12,6 +12,12 @@ var channelCache = null;
 // the client's user object, including their user ID, name, and if they are a professor
 var localUser = null;
 
+// whether the local user (a student) is globally muted
+// in the real world it would be stupid to have this be on the client but
+// this is just a prototype so it doesnt matter
+// "client side is the secure side!"
+var globallyMuted = false;
+
 //Disable the input box until connection is established.
 document.getElementById("messageInput").disabled = true;
 
@@ -186,6 +192,27 @@ connection.on("UpdateChannel", function (channel) {
     }
 });
 
+connection.on("UpdateChannelMutes", function (channel) {
+    // if we are already globally muted then do nothing
+    // set the placeholder again just in case
+    if (globallyMuted) {
+        document.getElementById("messageInput").placeholder = "You are globally muted!"
+        document.getElementById("messageInput").disabled = true;
+    }
+    // only update message box if we are looking at the chat room
+    if (channelCache.id === channel.id) {
+        channelCache = channel;
+        if (channel.mutedMembers.split(',').includes(localUser.id.toString())) {
+            document.getElementById("messageInput").placeholder = "You are muted in this chat room!"
+            document.getElementById("messageInput").disabled = true;
+        }
+        else {
+            document.getElementById("messageInput").placeholder = "Add Message"
+            document.getElementById("messageInput").disabled = false;
+        }
+    }
+});
+
 connection.on("SetUsersAsGloballyMuted", function (users) {
     if (localUser.isProfessor) {
         // update user cache for professor with newly muted users
@@ -197,10 +224,17 @@ connection.on("SetUsersAsGloballyMuted", function (users) {
     if (users.includes(localUser.id.toString())) {
         document.getElementById("messageInput").placeholder = "You are globally muted!"
         document.getElementById("messageInput").disabled = true;
+        globallyMuted = true;
+    }
+    // fixes a bug where users would be unmuted in the current chatroom if the global mutes were updated
+    else if (channelCache.mutedMembers.split(',').includes(localUser.id.toString())) {
+        document.getElementById("messageInput").placeholder = "You are muted in this chat room!"
+        document.getElementById("messageInput").disabled = true;
     }
     else {
         document.getElementById("messageInput").placeholder = "Add Message"
         document.getElementById("messageInput").disabled = false;
+        globallyMuted = false;
     }
 });
 
@@ -220,6 +254,20 @@ connection.on("SyncCurrentChannel", function (channel) {
         li.innerText = userCache.at(x - 1).name;
         userList.appendChild(li);
     });
+
+    // check we are muted in any way
+    if (globallyMuted) {
+        document.getElementById("messageInput").placeholder = "You are globally muted!"
+        document.getElementById("messageInput").disabled = true;
+    }
+    else if (channel.mutedMembers.split(',').includes(localUser.id.toString())) {
+        document.getElementById("messageInput").placeholder = "You are muted in this chat room!"
+        document.getElementById("messageInput").disabled = true;
+    }
+    else {
+        document.getElementById("messageInput").placeholder = "Add Message"
+        document.getElementById("messageInput").disabled = false;
+    }
 });
 
 // sync channels with the server
@@ -241,6 +289,11 @@ connection.on("SyncUsers", function (users) {
 
 connection.on("LoginSuccessful", function (user) {
     localUser = user;
+    if (localUser.isGloballyMuted) {
+        document.getElementById("messageInput").placeholder = "You are globally muted!"
+        document.getElementById("messageInput").disabled = true;
+        globallyMuted = true;
+    }
     // request a cache of all users
     connection.invoke("RequestUsers").catch(function (err) {
         return console.error(err.toString());
@@ -264,10 +317,6 @@ connection.on("LoginSuccessful", function (user) {
         document.getElementById("requestChat").hidden = false;
         document.getElementById("studSettings").hidden = false;
     }
-    if (localUser.IsGloballyMuted) {
-        document.getElementById("messageInput").placeholder = "You are globally muted!"
-        document.getElementById("messageInput").disabled = true;
-    }
 });
    
 
@@ -275,8 +324,6 @@ connection.on("LoginSuccessful", function (user) {
 connection.start().then(function () {
     document.getElementById("messageInput").disabled = false;
     // "login" as a user
-    // TODO: format the UI differently if the professor logs in
-    // TODO: should probably check if the user actually exists in the database
     let userID = parseInt(prompt("Please enter a user ID to login as"));
     connection.invoke("RequestLogin", userID).catch(function (err) {
         return console.error(err.toString());
@@ -285,7 +332,6 @@ connection.start().then(function () {
     return console.error(err.toString());
 });
 
-// TODO: actually be able to create/delete channels
 function changeChannel(id) {
     // disable the new channel from being clicked and enable the old one
     document.getElementById(`channelID_${channelCache.id}`).disabled = false;
@@ -457,15 +503,22 @@ $(document).ready(function () {
         });
     });
 
+    $('#muteUsersLocally').on('click', function (e) {
+        $('#muteUsersLocallyModal').modal('toggle');
+    });
+
     $('#muteUsersLocallyModal').on('show.bs.modal', function (e) {
         $('#muteLocallyInputHolder').empty();
-        userCache.forEach(x => {
-            if (x.isProfessor) return;
+        let localMutes = channelCache.mutedMembers.split(',');
+        channelCache.members.split(',').forEach(x => {
+            let user = userCache.at(x - 1);
+            if (user.isProfessor) return;
+            let isLocallyMuted = localMutes.includes(x);
             $('#muteLocallyInputHolder').append($(`
             <div class="form-check">
-               <input class="form-check-input" type="checkbox" value="" id="user${x.id}" ${x.isGloballyMuted ? "checked" : ""}>
-               <label class="form-check-label" for="user${x.id}" style="color: black">
-                   ${x.name}
+               <input class="form-check-input" type="checkbox" value="" id="user${user.id}" ${isLocallyMuted ? "checked" : ""}>
+               <label class="form-check-label" for="user${user.id}" style="color: black">
+                   ${user.name}
                </label>
             </div>`));
         });
@@ -476,7 +529,7 @@ $(document).ready(function () {
         $('#muteLocallyInputHolder input:checked').each(function () {
             users.push($(this).attr('id').substring(4));
         });
-        connection.invoke("UpdateLocallyMutedMembers", channelCache.id, add, remove).catch(function (err) {
+        connection.invoke("UpdateLocallyMutedMembers", channelCache.id, users).catch(function (err) {
             return console.error(err.toString());
         });
     });

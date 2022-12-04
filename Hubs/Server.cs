@@ -6,7 +6,7 @@ namespace BlackboardChat.Hubs
     public class Server : Hub
     {
         public async Task SendMessage(int channelID, int userID, string message)
-        {         
+        {
             await Database.AddMessage(channelID, userID, message, DateTime.Now);
             Message msg = await Database.GetMostRecentMessage(userID);
             await Clients.All.SendAsync("ReceiveMessage", msg);
@@ -25,6 +25,18 @@ namespace BlackboardChat.Hubs
             foreach (string s in users)
                 await Database.SetUserAsGloballyMuted(int.Parse(s));
             await Clients.All.SendAsync("SetUsersAsGloballyMuted", users);
+        }
+
+        public async Task UpdateLocallyMutedMembers(int channelId, string[] users)
+        {
+            Channel channel = await Database.GetChannelById(channelId);
+            if (channel != null)
+            {         
+                string updated = string.Join(',', users);
+                channel.MutedMembers = updated;
+                await Database.UpdateChannelMutedMembers(channel.Id, updated);
+                await Clients.All.SendAsync("UpdateChannelMutes", channel);
+            }
         }
 
 
@@ -122,29 +134,7 @@ namespace BlackboardChat.Hubs
             }
         }
 
-        public async Task UpdateLocallyMutedMembers(int channelId, string[] add, string[] remove)
-        {
-            Channel channel = await Database.GetChannelById(channelId);
-            if (channel != null)
-            {
-                List<string> MutedMembers = channel.MutedMembers.Split(',').ToList();
-                foreach (string s in add)
-                {
-                    if (!MutedMembers.Contains(s))
-                    {
-                        MutedMembers.Add(s);
-                    }
-                }
-                foreach (string s in remove)
-                {
-                    MutedMembers.Remove(s);
-                }
-                string updated = string.Join(',', MutedMembers);
-                channel.MutedMembers = updated;
-                await Database.UpdateChannelMutedMembers(channel.Id, updated);
-                await Clients.All.SendAsync("UpdateChannel", channel);
-            }
-        }
+       
 
-        }
+    }    
 }

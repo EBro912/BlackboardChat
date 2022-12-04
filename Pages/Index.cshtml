@@ -8,7 +8,7 @@
 <body>
     <div class="container">
         <div class="row no-gutters" id="rowdiv">
-            <!-- 3 column div for navbar and settings -->
+            <!-- 2 column div for navbar and settings -->
             <div class="col-2">
                 <nav id="navbar">
 
@@ -29,7 +29,7 @@
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" href="#logTest">Open log</button>
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="editUsers">Edit Chat Room Users</button>
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="muteUsersGlobally">Mute/Unmute Users Globally</button>
-                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="#muteUsersLocally">Mute/Unmute Users in Current Channel</button>
+                                    <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="muteUsersLocally">Mute/Unmute Users in Current Channel</button>
                                     <button class="btn btn-danger" type="button" data-dismiss="modal" data-toggle="modal" id="deleteChatroom">Delete Chatroom</button>
                                 </div>
                                 <div class="modal-footer">
@@ -122,25 +122,22 @@
                         </div>
                     </div>
 
-                    <!--Unmute users modal-->
-                    <div class="modal" id="muteUsersLocallyModal in Current Channel" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <!--Locally mute/unmute users modal-->
+                    <div class="modal" id="muteUsersLocallyModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header">
-                                    <h5 class="modal-title" id="exampleModalLabel">Remove user</h5>
+                                    <h5 class="modal-title" id="exampleModalLabel">Mute/Unmute Users in Current Chat Room</h5>
                                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body" id="muteLocallyInputHolder">
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="" id="check1">
-                                        <label class="form-check-label" for="check1">
-                                            user 1
-                                        </label>
+      
                                     </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-success" data-dismiss="modal" href="#checkboxTesting" id="confirmMuteLocally">Confirm</button>
-                                    <button type="button" class="btn btn-danger" data-dismiss="modal" href="#checkboxTesting">Cancel</button>
+                                    <button type="button" class="btn btn-success" data-bs-dismiss="modal" href="#checkboxTesting" id="confirmMuteLocally">Confirm</button>
+                                    <button type="button" class="btn btn-danger" data-bs-dismiss="modal" href="#checkboxTesting">Cancel</button>
                                 </div>
                             </div>
                         </div>
@@ -199,7 +196,7 @@
                     </div>
                 </nav>
             </div>
-            <!-- 6 column div for chatbox that shows messages -->
+            <!-- 8 column div for chatbox that shows messages -->
             <div class="col-8">
                 <div id="chatbox">
                     <!-- New messages will go here -->
@@ -209,7 +206,7 @@
                 </div>
             </div>
 
-            <!-- 3 column div for users display -->
+            <!-- 2 column div for users display -->
             <div class="col-2">
                 <ul id="usersShown">
                     <!-- Channel members will go here -->

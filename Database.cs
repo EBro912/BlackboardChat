@@ -37,7 +37,7 @@ namespace BlackboardChat
                 + "IsForum TINYINT NOT NULL,"
                 // this character limit should never be reached but give plenty of room just in case
                 + "Members VARCHAR(10000) NOT NULL,"
-                + "MutedMembers VARCHAR(10000) );");
+                + "MutedMembers VARCHAR(10000) NOT NULL);");
 
             // removes all existing channels for testing purposes
             // comment this out if you want to keep the channels made
@@ -50,8 +50,8 @@ namespace BlackboardChat
             // if the default channel doesn't exist, add it to the databsae
             // we can shortcut here since we know how big our class is and their ids
             // realistically everyone would have to be dynamically added
-            connection.Execute("INSERT OR IGNORE INTO Channels (Name, IsForum, Members)" +
-                "VALUES ('open-chat', 0, '1,2,3,4,5,6,7,8,9,10,11');");
+            connection.Execute("INSERT OR IGNORE INTO Channels (Name, IsForum, Members, MutedMembers)" +
+                "VALUES ('open-chat', 0, '1,2,3,4,5,6,7,8,9,10,11', '');");
 
             if ((await GetAllUsers()).Count() < 11)
             {
@@ -84,8 +84,8 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             var parameters = new { Name = channelName, IsForum = isForum, Members = members };
-            await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Members)" +
-                "VALUES (@Name, @IsForum, @Members);", parameters);
+            await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Members, MutedMembers)" +
+                "VALUES (@Name, @IsForum, @Members, '');", parameters);
         }
 
         // gets a user's most recent message
