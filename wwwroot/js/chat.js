@@ -464,6 +464,31 @@ $(document).ready(function () {
         });
     });
 
+    //$('#muteUsersLocallyModal').on('show.bs.modal', function (e) {
+    //    $('#muteLocallyInputHolder').empty();
+    //    userCache.forEach(x => {
+    //        if (x.isProfessor) return;
+    //        $('#muteLocallyInputHolder').append($(`
+    //        <div class="form-check">
+    //           <input class="form-check-input" type="checkbox" value="" id="user${x.id}" ${x.isGloballyMuted ? "checked" : ""}>
+    //           <label class="form-check-label" for="user${x.id}" style="color: black">
+    //               ${x.name}
+    //           </label>
+    //        </div>`));
+    //    });
+    //});
+
+    //$("#confirmMuteLocally").on('click', function (e) {
+    //    var users = [];
+    //    $('#muteLocallyInputHolder input:checked').each(function () {
+    //        users.push($(this).attr('id').substring(4));
+    //    });
+    //    connection.invoke("UpdateLocallyMutedMembers", channelID, add, remove).catch(function (err) {
+    //        return console.error(err.toString());
+    //    });
+    //});
+
+
     $('#requestChat').on("click", function (event) {
         connection.invoke('AddProfUserChannel', localUser).catch(function (err) {
             return console.error(err.toString());

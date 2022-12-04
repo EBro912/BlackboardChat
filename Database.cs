@@ -37,6 +37,7 @@ namespace BlackboardChat
                 + "IsForum TINYINT NOT NULL,"
                 // this character limit should never be reached but give plenty of room just in case
                 + "Members VARCHAR(10000) NOT NULL);");
+                //+ "MutedMembers VARCHAR(10000) );");
 
             // removes all existing channels for testing purposes
             // comment this out if you want to keep the channels made

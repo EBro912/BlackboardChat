@@ -134,7 +134,7 @@ namespace BlackboardChat.Hubs
             }
         }
 
-        public async Task UpdateMutedUsersInChannel(int channelId, string[] add, string[] remove)
+        public async Task UpdateLocallyMutedMembers(int channelId, string[] add, string[] remove)
         {
             Channel channel = await Database.GetChannelById(channelId);
             if (channel != null)
