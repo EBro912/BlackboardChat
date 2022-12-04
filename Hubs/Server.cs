@@ -80,26 +80,14 @@ namespace BlackboardChat.Hubs
             await Clients.All.SendAsync("CreateChannel", channel);
         }
 
-        public async Task RequestUsersInChannel(int channelId)
+        public async Task RequestCurrentChannel(int channelId)
         {
-            // edge case, 0 is the default channel which isnt in the database and everyone can see
-            // so just return everyone
-            if (channelId == 0)
-            {
-                await Clients.Caller.SendAsync("SyncChannelUsers", "1,2,3,4,5,6,7,8,9,10,11");
-            }
-            else
-            {
-                Channel channel = await Database.GetChannelById(channelId);
-                await Clients.Caller.SendAsync("SyncChannelUsers", channel.Members);
-            }
+            Channel channel = await Database.GetChannelById(channelId);
+            await Clients.Caller.SendAsync("SyncCurrentChannel", channel);
         }
 
         public async Task DeleteChannel(int channelID)
         {
-            // prevent deleting the default chat room
-            if (channelID == 0)
-                return;
             Channel channel = await Database.GetChannelById(channelID);
             if (channel != null)
             {

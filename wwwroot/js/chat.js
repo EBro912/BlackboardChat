@@ -6,11 +6,9 @@ var connection = new signalR.HubConnectionBuilder().withUrl("/chat").build();
 // prevents us from having to ping the database every time we need to retrieve a user
 // in the real world, students can drop the class but we dont have to worry about that here
 var userCache = [];
-// the client's current channel ID
-var channelID = 0;
-// a list of users that can see the current channel
+// a reference to the current channel
 // used to make some calculations easier
-var channelUserCache = "";
+var channelCache = null;
 // the client's user object, including their user ID, name, and if they are a professor
 var localUser = null;
 
@@ -30,10 +28,7 @@ document.getElementById("profSettings").hidden = true;
 function addMessage(message) {
     // only display messages sent in the current channel
     // TODO (maybe): some sort of notification/unread system for other channels
-
-
-
-    if (message.channel === channelID) {
+    if (message.channel === channelCache.id) {
         var isLocalUser = message.author === localUser.id;
         var sender = (isLocalUser ? 'You' : userCache.at(message.author - 1).name);
 
@@ -42,8 +37,7 @@ function addMessage(message) {
         messagebox.addClass(isLocalUser ? 'user' : 'otheruser');
         messagebox.attr('id', `message_${message.id}`);
 
-        
-
+     
         if (message.isDeleted) {
             // if the message is already deleted, then show it as deleted to the professor
             // for students just dont show it at all
@@ -169,8 +163,8 @@ connection.on("RemoveChannel", function (channel) {
     // only attempt to delete the channel if the user has access to it
     if (channel.members.split(',').includes(localUser.id.toString())) {
         // if we are looking at the channel, then change channels
-        if (channelID === channel.id)
-            changeChannel(0);
+        if (channelCache.id === channel.id)
+            changeChannel(1);
         $(`#channelID_${channel.id}`).remove();
     }
 });
@@ -217,10 +211,10 @@ connection.on("SyncChannelMessages", function (messages) {
     });
 });
 
-connection.on("SyncChannelUsers", function (users) {
-    channelUserCache = users;
+connection.on("SyncCurrentChannel", function (channel) {
+    channelCache = channel;
     const userList = document.getElementById("usersShown");
-    users.split(',').forEach(x => {
+    channel.members.split(',').map(Number).forEach(x => {
         var li = document.createElement("li");
         li.className = "users";
         li.innerText = userCache.at(x - 1).name;
@@ -255,10 +249,10 @@ connection.on("LoginSuccessful", function (user) {
     connection.invoke("RequestChannels").catch(function (err) {
         return console.error(err.toString());
     });
-    connection.invoke("RequestUsersInChannel", channelID).catch(function (err) {
+    connection.invoke("RequestCurrentChannel", 1).catch(function (err) {
         return console.error(err.toString());
     });
-    connection.invoke("RequestChannelMessages", channelID).catch(function (err) {
+    connection.invoke("RequestChannelMessages", 1).catch(function (err) {
         return console.error(err.toString());
     });
 
@@ -294,10 +288,9 @@ connection.start().then(function () {
 // TODO: actually be able to create/delete channels
 function changeChannel(id) {
     // disable the new channel from being clicked and enable the old one
-    document.getElementById(`channelID_${channelID}`).disabled = false;
+    document.getElementById(`channelID_${channelCache.id}`).disabled = false;
     var newChnl = document.getElementById(`channelID_${id}`);
     newChnl.disabled = true;
-    channelID = id;
     // remove all displayed messages from the message list
     document.getElementById("chatbox").replaceChildren();
 
@@ -305,13 +298,13 @@ function changeChannel(id) {
     document.getElementById("usersShown").replaceChildren();
 
     // request users in new channel to display on sidebar
-    connection.invoke("RequestUsersInChannel", channelID).catch(function (err) {
+    connection.invoke("RequestCurrentChannel", id).catch(function (err) {
         return console.error(err.toString());
     });
 
     // request the channels messages
     // TODO: possibly cache messages that we already have
-    connection.invoke("RequestChannelMessages", channelID).catch(function (err) {
+    connection.invoke("RequestChannelMessages", id).catch(function (err) {
         return console.error(err.toString());
     });
 }
@@ -328,7 +321,7 @@ $(document).ready(function () {
         if (event.key === "Enter") {
             var message = $("#messageInput").val().trim();
             if (message !== "") {
-                connection.invoke("SendMessage", channelID, localUser.id, message).catch(function (err) {
+                connection.invoke("SendMessage", channelCache.id, localUser.id, message).catch(function (err) {
                     return console.error(err.toString());
                 });
                 // reset the input box when a message is sent
@@ -343,7 +336,7 @@ $(document).ready(function () {
     });
 
     $('#editUsers').on('click', function (e) {
-        if (channelID == 0) {
+        if (channelCache.id == 1) {
             alert("The default chat room user list may not be edited.");
             return;
         }
@@ -388,7 +381,7 @@ $(document).ready(function () {
     });
 
     $('#deleteChatroom').on('click', function (e) {
-        if (channelID == 0) {
+        if (channelCache.id == 1) {
             alert("The default chat room may not be deleted.");
             return;
         }
@@ -396,7 +389,7 @@ $(document).ready(function () {
     });
 
     $('#confirmDelete').on('click', function (e) {
-        deleteChannel(channelID);
+        deleteChannel(channelCache.id);
     });
 
     $('#confirmCreate').on('click', function (e) {
@@ -431,7 +424,7 @@ $(document).ready(function () {
                 remove.push(id);
             }
         });
-        connection.invoke("UpdateUsersInChannel", channelID, add, remove).catch(function (err) {
+        connection.invoke("UpdateUsersInChannel", channelCache.id, add, remove).catch(function (err) {
             return console.error(err.toString());
         });
     });
@@ -464,29 +457,29 @@ $(document).ready(function () {
         });
     });
 
-    //$('#muteUsersLocallyModal').on('show.bs.modal', function (e) {
-    //    $('#muteLocallyInputHolder').empty();
-    //    userCache.forEach(x => {
-    //        if (x.isProfessor) return;
-    //        $('#muteLocallyInputHolder').append($(`
-    //        <div class="form-check">
-    //           <input class="form-check-input" type="checkbox" value="" id="user${x.id}" ${x.isGloballyMuted ? "checked" : ""}>
-    //           <label class="form-check-label" for="user${x.id}" style="color: black">
-    //               ${x.name}
-    //           </label>
-    //        </div>`));
-    //    });
-    //});
+    $('#muteUsersLocallyModal').on('show.bs.modal', function (e) {
+        $('#muteLocallyInputHolder').empty();
+        userCache.forEach(x => {
+            if (x.isProfessor) return;
+            $('#muteLocallyInputHolder').append($(`
+            <div class="form-check">
+               <input class="form-check-input" type="checkbox" value="" id="user${x.id}" ${x.isGloballyMuted ? "checked" : ""}>
+               <label class="form-check-label" for="user${x.id}" style="color: black">
+                   ${x.name}
+               </label>
+            </div>`));
+        });
+    });
 
-    //$("#confirmMuteLocally").on('click', function (e) {
-    //    var users = [];
-    //    $('#muteLocallyInputHolder input:checked').each(function () {
-    //        users.push($(this).attr('id').substring(4));
-    //    });
-    //    connection.invoke("UpdateLocallyMutedMembers", channelID, add, remove).catch(function (err) {
-    //        return console.error(err.toString());
-    //    });
-    //});
+    $("#confirmMuteLocally").on('click', function (e) {
+        var users = [];
+        $('#muteLocallyInputHolder input:checked').each(function () {
+            users.push($(this).attr('id').substring(4));
+        });
+        connection.invoke("UpdateLocallyMutedMembers", channelCache.id, add, remove).catch(function (err) {
+            return console.error(err.toString());
+        });
+    });
 
 
     $('#requestChat').on("click", function (event) {
