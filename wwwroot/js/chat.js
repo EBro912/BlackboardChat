@@ -413,7 +413,7 @@ $(document).ready(function () {
 
     $('#editUsersModal').on('show.bs.modal', function (e) {
         $('#editInputHolder').empty();
-        let users = channelUserCache.split(',').map(Number);
+        let users = channelCache.members.split(',').map(Number);
         userCache.forEach(x => {
             if (x.isProfessor) return;
             $('#editInputHolder').append($(`

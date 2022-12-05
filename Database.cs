@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Dapper;
 using BlackboardChat.Data;
+using Action = BlackboardChat.Data.Action;
 
 namespace BlackboardChat
 {
@@ -38,6 +39,12 @@ namespace BlackboardChat
                 // this character limit should never be reached but give plenty of room just in case
                 + "Members VARCHAR(10000) NOT NULL,"
                 + "MutedMembers VARCHAR(10000) NOT NULL);");
+
+            // create the Log table if it doesn't already exist
+            connection.Execute("CREATE TABLE IF NOT EXISTS Log ("
+                + "Id INTEGER PRIMARY KEY,"
+                + "Action INTEGER NOT NULL,"
+                + "Message VARCHAR(10000) NOT NULL);");
 
             // removes all existing channels for testing purposes
             // comment this out if you want to keep the channels made
@@ -209,6 +216,25 @@ namespace BlackboardChat
             await connection.ExecuteAsync("UPDATE Channels SET MutedMembers = @Members WHERE rowid = @Id ", parameters);
         }
 
+        public static async Task AddLogEntry(Action action, string message)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Action = action, Message = message };
+            await connection.ExecuteAsync("INSERT INTO Log (Action, Message) VALUES (@Action, @Message)", parameters);
+        }
+
+        public static async Task<IEnumerable<LogEntry>> GetLogWithAction(Action action)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Action = action };
+            return await connection.QueryAsync<LogEntry>("SELECT * FROM Log WHERE Action = @Action", parameters);
+        }
+
+        public static async Task<IEnumerable<LogEntry>> GetLog()
+        {
+            using var connection = new SqliteConnection(name);
+            return await connection.QueryAsync<LogEntry>("SELECT * FROM Log");
+        }
 
         // creates a dummy class list with one professor and 10 students
         public static async Task AddDummyUsers()
