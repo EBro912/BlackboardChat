@@ -468,7 +468,6 @@ $(document).ready(function () {
         var remove = [];
         var addUsernames = [];
         var removeUsernames = [];
-        var currentMembers = channelCache.members.split(',');
         $('#editInputHolder input').each(function () {
             let id = $(this).attr('id').substring(4);
             if ($(this).is(':checked')) {
@@ -505,10 +504,13 @@ $(document).ready(function () {
 
     $("#confirmMuteGlobally").on('click', function (e) {
         var users = [];
+        var usernames = [];
         $('#muteGloballyInputHolder input:checked').each(function () {
-            users.push($(this).attr('id').substring(4));
+            let id = $(this).attr('id').substring(4);
+            users.push(id);
+            usernames.push(userCache.at(id - 1).name);
         });
-        connection.invoke("GloballyMuteUsers", users).catch(function (err) {
+        connection.invoke("GloballyMuteUsers", users, usernames).catch(function (err) {
             return console.error(err.toString());
         });
     });

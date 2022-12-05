@@ -23,12 +23,14 @@ namespace BlackboardChat.Hubs
             await Clients.All.SendAsync("DeleteMessage", id);
         }
 
-        public async Task GloballyMuteUsers(string[] users)
+        public async Task GloballyMuteUsers(string[] users, string[] usernames)
         {
             // reset the mutes back to default
             await Database.ResetMutes();
             foreach (string s in users)
                 await Database.SetUserAsGloballyMuted(int.Parse(s));
+            string message = $"<b>The following users were globally muted:</b> {string.Join(", ", usernames)}";
+            await Database.AddLogEntry(Action.GLOBALLY_MUTE_USERS, DateTime.Now, message);
             await Clients.All.SendAsync("SetUsersAsGloballyMuted", users);
         }
 
