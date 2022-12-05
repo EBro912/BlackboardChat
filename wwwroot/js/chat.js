@@ -534,6 +534,14 @@ $(document).ready(function () {
         });
     });
 
+    $('#openLog').on('click', function (e) {
+        $("#logModal").modal('toggle');
+    });
+
+    $('#logModal').on('show.bs.modal', function (e) {
+        // TODO
+    });
+
 
     $('#requestChat').on("click", function (event) {
         connection.invoke('AddProfUserChannel', localUser).catch(function (err) {
