@@ -64,7 +64,8 @@ function addMessage(message) {
             deletebutton.addEventListener('click', function () {
                 // convert message id to a number
                 let num = Number.parseInt($(this).parent().attr('id').split('_')[1]);
-                connection.invoke("RequestDeleteMessage", num).catch(function (err) {
+                // pass this function our name to save a database call
+                connection.invoke("RequestDeleteMessage", num, localUser.name).catch(function (err) {
                     return console.error(err.toString());
                 });
             });
@@ -80,7 +81,7 @@ function addMessage(message) {
         // create message header
         var messageheader = document.createElement('text');
         messageheader.setAttribute('class', 'messageheader');
-        messageheader.innerText = " (" + createDateString() + ") :\n";
+        messageheader.innerText = " (" + createDateString(new Date(Date.parse(message.timestamp))) + ") :\n";
 
         // create message text
         var messagetext = document.createElement('text');
@@ -99,11 +100,8 @@ function addMessage(message) {
 }
 
 
-function createDateString() {
+function createDateString(date) {
     var datestr;
-
-    // get date for message timestamp
-    var date = new Date();
 
     var month = date.getMonth() + 1;
     var day = date.getDate();
@@ -355,11 +353,13 @@ function changeChannel(id) {
     });
 }
 
-function deleteChannel(id) {
-    connection.invoke("DeleteChannel", id).catch(function (err) {
-        return console.error(err.toString());
+connection.on("UpdateLog", function (log) {
+    $('#logbody').empty();
+    log.forEach(x => {
+        $('#logbody').append(`<p>${createDateString(new Date(Date.parse(x.timestamp)))} ${x.message}</p>`).after('<hr>');
     });
-}
+    $('#logModal').modal('toggle');
+});
 
 
 $(document).ready(function () {
@@ -435,7 +435,9 @@ $(document).ready(function () {
     });
 
     $('#confirmDelete').on('click', function (e) {
-        deleteChannel(channelCache.id);
+        connection.invoke("DeleteChannel", channelCache.id, localUser.name).catch(function (err) {
+            return console.error(err.toString());
+        });
     });
 
     $('#confirmCreate').on('click', function (e) {
@@ -449,10 +451,14 @@ $(document).ready(function () {
         }
         // professor is always included
         var users = ['1'];
+        // a list of usernames for the log
+        var usernames = ['Professor Jim'];
         $('#createInputHolder input:checked').each(function () {
-            users.push($(this).attr('id').substring(4));
+            let id = $(this).attr('id').substring(4);
+            users.push(id);
+            usernames.push(userCache.at(id - 1).name);
         });
-        connection.invoke("AddChannel", name, users).catch(function (err) {
+        connection.invoke("AddChannel", name, users, localUser.name, usernames).catch(function (err) {
             return console.error(err.toString());
         });
     });
@@ -460,7 +466,6 @@ $(document).ready(function () {
     $('#confirmEdit').on('click', function (e) {
         var add = [];
         var remove = [];
-        console.log("clicked");
         $('#editInputHolder input').each(function () {
             let id = $(this).attr('id').substring(4);
             if ($(this).is(':checked')) {
@@ -535,7 +540,9 @@ $(document).ready(function () {
     });
 
     $('#openLog').on('click', function (e) {
-        $("#logModal").modal('toggle');
+        connection.invoke("RequestLog").catch(function (err) {
+            return console.error(err.toString());
+        });
     });
 
     $('#logModal').on('show.bs.modal', function (e) {

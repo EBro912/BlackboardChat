@@ -2,6 +2,8 @@
 {
     public enum Action
     {
-        // TODO: add enum cases
+        DELETE_MESSAGE,
+        CREATE_CHATROOM,
+        DELETE_CHATROOM
     }
 }

@@ -1,5 +1,6 @@
 ﻿using BlackboardChat.Data;
 using Microsoft.AspNetCore.SignalR;
+using Action = BlackboardChat.Data.Action;
 
 namespace BlackboardChat.Hubs
 {
@@ -12,9 +13,13 @@ namespace BlackboardChat.Hubs
             await Clients.All.SendAsync("ReceiveMessage", msg);
         }
 
-        public async Task RequestDeleteMessage(int id)
+        public async Task RequestDeleteMessage(int id, string deleter)
         {
             await Database.SetMessageAsDeleted(id);
+            Message msg = await Database.GetMessageById(id);
+            User target = await Database.GetUserById(msg.Author);
+            string message = $"<b>{deleter} deleted a message from {target.Name}:</b> \"{msg.Content}\"";
+            await Database.AddLogEntry(Action.DELETE_MESSAGE, DateTime.Now, message);
             await Clients.All.SendAsync("DeleteMessage", id);
         }
 
@@ -68,13 +73,15 @@ namespace BlackboardChat.Hubs
             await Clients.Caller.SendAsync("SyncChannels", channels.ToList());
         }
 
-        public async Task AddChannel(string name, string[] members)
+        public async Task AddChannel(string name, string[] members, string creator, string[] usernames)
         {
             Channel channel = await Database.GetChannelByName(name);
             if (channel != null) { return; }
             await Database.AddChannel(name, false, string.Join(',', members));
             // after creating the channel in the database, get its row id to be sent back
             channel = await Database.GetChannelByName(name);
+            string message = $"<b>{creator} created chat room {name} with the following users:</b> {string.Join(", ", usernames)}";
+            await Database.AddLogEntry(Action.CREATE_CHATROOM, DateTime.Now, message);
             await Clients.All.SendAsync("CreateChannel", channel);
         }
 
@@ -98,7 +105,7 @@ namespace BlackboardChat.Hubs
             await Clients.Caller.SendAsync("SyncCurrentChannel", channel);
         }
 
-        public async Task DeleteChannel(int channelID)
+        public async Task DeleteChannel(int channelID, string deleter)
         {
             Channel channel = await Database.GetChannelById(channelID);
             if (channel != null)
@@ -106,6 +113,8 @@ namespace BlackboardChat.Hubs
                 // delete the chat room and the messages that were in the chat room
                 await Database.DeleteChannel(channel.Id);
                 await Database.DeleteMessagesInChannel(channel.Id);
+                string message = $"<b>{deleter} deleted chat room {channel.Name}</b>";
+                await Database.AddLogEntry(Action.DELETE_CHATROOM, DateTime.Now, message);
                 await Clients.All.SendAsync("RemoveChannel", channel);
             }
         }
@@ -134,7 +143,12 @@ namespace BlackboardChat.Hubs
             }
         }
 
-       
+        public async Task RequestLog()
+        {
+            var log = await Database.GetLog();
+            await Clients.Caller.SendAsync("UpdateLog", log.ToList());
+        }
+
 
     }    
 }

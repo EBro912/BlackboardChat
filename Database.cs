@@ -44,6 +44,7 @@ namespace BlackboardChat
             connection.Execute("CREATE TABLE IF NOT EXISTS Log ("
                 + "Id INTEGER PRIMARY KEY,"
                 + "Action INTEGER NOT NULL,"
+                + "TimeStamp DATETIME NOT NULL,"
                 + "Message VARCHAR(10000) NOT NULL);");
 
             // removes all existing channels for testing purposes
@@ -53,6 +54,10 @@ namespace BlackboardChat
             // removes all existing messages for testing purposes
             // comment this out if you want to keep the messages sent
             connection.Execute("DELETE FROM Messages");
+
+            // removes all existing log messages for testing purposes
+            // comment this out if you want to keep the log messages entered
+            connection.Execute("DELETE FROM Log");
 
             // if the default channel doesn't exist, add it to the databsae
             // we can shortcut here since we know how big our class is and their ids
@@ -108,6 +113,13 @@ namespace BlackboardChat
             using var connection = new SqliteConnection(name);
             var parameters = new { Id = id };
             await connection.ExecuteAsync("UPDATE Messages SET IsDeleted = 1 WHERE rowid = @Id", parameters);
+        }
+
+        public static async Task<Message> GetMessageById(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            return await connection.QueryFirstOrDefaultAsync<Message>("SELECT * FROM Messages WHERE rowid = @Id", parameters);
         }
 
         public static async Task ResetMutes()
@@ -216,11 +228,11 @@ namespace BlackboardChat
             await connection.ExecuteAsync("UPDATE Channels SET MutedMembers = @Members WHERE rowid = @Id ", parameters);
         }
 
-        public static async Task AddLogEntry(Action action, string message)
+        public static async Task AddLogEntry(Action action, DateTime timestamp, string message)
         {
             using var connection = new SqliteConnection(name);
-            var parameters = new { Action = action, Message = message };
-            await connection.ExecuteAsync("INSERT INTO Log (Action, Message) VALUES (@Action, @Message)", parameters);
+            var parameters = new { Action = action, TimeStamp = timestamp, Message = message };
+            await connection.ExecuteAsync("INSERT INTO Log (Action, TimeStamp, Message) VALUES (@Action, @TimeStamp, @Message)", parameters);
         }
 
         public static async Task<IEnumerable<LogEntry>> GetLogWithAction(Action action)
