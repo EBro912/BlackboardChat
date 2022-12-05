@@ -4,6 +4,8 @@
     {
         DELETE_MESSAGE,
         CREATE_CHATROOM,
-        DELETE_CHATROOM
+        DELETE_CHATROOM,
+        ADD_USERS,
+        REMOVE_USERS
     }
 }

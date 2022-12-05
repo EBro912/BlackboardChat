@@ -356,7 +356,7 @@ function changeChannel(id) {
 connection.on("UpdateLog", function (log) {
     $('#logbody').empty();
     log.forEach(x => {
-        $('#logbody').append(`<p>${createDateString(new Date(Date.parse(x.timestamp)))} ${x.message}</p>`).after('<hr>');
+        $('#logbody').append(`<p>${createDateString(new Date(Date.parse(x.timestamp)))} ${x.message}</p>`);
     });
     $('#logModal').modal('toggle');
 });
@@ -466,16 +466,21 @@ $(document).ready(function () {
     $('#confirmEdit').on('click', function (e) {
         var add = [];
         var remove = [];
+        var addUsernames = [];
+        var removeUsernames = [];
+        var currentMembers = channelCache.members.split(',');
         $('#editInputHolder input').each(function () {
             let id = $(this).attr('id').substring(4);
             if ($(this).is(':checked')) {
                 add.push(id);
+                addUsernames.push(userCache.at(id - 1).name);
             }
             else {
                 remove.push(id);
+                removeUsernames.push(userCache.at(id - 1).name);
             }
         });
-        connection.invoke("UpdateUsersInChannel", channelCache.id, add, remove).catch(function (err) {
+        connection.invoke("UpdateUsersInChannel", channelCache.id, add, remove, addUsernames, removeUsernames).catch(function (err) {
             return console.error(err.toString());
         });
     });

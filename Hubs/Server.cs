@@ -119,26 +119,46 @@ namespace BlackboardChat.Hubs
             }
         }
 
-        public async Task UpdateUsersInChannel(int channelId, string[] add, string[] remove)
+        public async Task UpdateUsersInChannel(int channelId, string[] add, string[] remove, string[] addUsernames, string[] removeUsernames)
         {
             Channel channel = await Database.GetChannelById(channelId);
+            // arrays to log users with
+            List<string> logAdd = new List<string>();
+            List<string> logRemove = new List<string>();
             if (channel != null)
             {
                 List<string> members = channel.Members.Split(',').ToList();
-                foreach (string s in add)
+                for (int i = 0; i < add.Length; i++)
                 {
-                    if (!members.Contains(s))
+                    Console.WriteLine($"testing {add[i]}");
+                    if (!members.Contains(add[i]))
                     {
-                        members.Add(s);
+                        Console.WriteLine($"adding {add[i]}");
+                        members.Add(add[i]);
+                        logAdd.Add(addUsernames[i]);
                     }
                 }
-                foreach (string s in remove)
+                for (int i = 0; i < remove.Length; i++)
                 {
-                    members.Remove(s);
+                    if (members.Contains(remove[i]))
+                    {
+                        members.Remove(remove[i]);
+                        logRemove.Add(removeUsernames[i]);
+                    }
                 }
                 string updated = string.Join(',', members);
                 channel.Members = updated;
                 await Database.UpdateChannelMembers(channel.Id, updated);
+                if (logAdd.Count > 0)
+                {
+                    string message = $"<b>The following members were added to {channel.Name}:</b> {string.Join(", ", logAdd)}";
+                    await Database.AddLogEntry(Action.ADD_USERS, DateTime.Now, message);
+                }
+                if (logRemove.Count > 0)
+                {
+                    string message = $"<b>The following members were removed from {channel.Name}:</b> {string.Join(", ", logRemove)}";
+                    await Database.AddLogEntry(Action.REMOVE_USERS, DateTime.Now, message);
+                }
                 await Clients.All.SendAsync("UpdateChannel", channel);
             }
         }
