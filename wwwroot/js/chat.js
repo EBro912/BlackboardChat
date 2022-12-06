@@ -385,6 +385,10 @@ $(document).ready(function () {
         $('#addChannelModal').modal('toggle');
     });
 
+    $('#addForumChannel').on('click', function (e) {
+        $('#addForumChannelModal').modal('toggle');
+    });
+
     $('#editUsers').on('click', function (e) {
         if (channelCache.id == 1) {
             alert("The default chat room user list may not be edited.");
