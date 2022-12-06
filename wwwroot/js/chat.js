@@ -503,14 +503,22 @@ $(document).ready(function () {
     });
 
     $("#confirmMuteGlobally").on('click', function (e) {
-        var users = [];
-        var usernames = [];
-        $('#muteGloballyInputHolder input:checked').each(function () {
+        var add = [];
+        var remove = [];
+        var addUsernames = [];
+        var removeUsernames = [];
+        $('#muteGloballyInputHolder input').each(function () {
             let id = $(this).attr('id').substring(4);
-            users.push(id);
-            usernames.push(userCache.at(id - 1).name);
+            if ($(this).is(':checked')) {
+                add.push(id);
+                addUsernames.push(userCache.at(id - 1).name);
+            }
+            else {
+                remove.push(id);
+                removeUsernames.push(userCache.at(id - 1).name);
+            }
         });
-        connection.invoke("GloballyMuteUsers", users, usernames).catch(function (err) {
+        connection.invoke("GloballyMuteUsers", add, remove, addUsernames, removeUsernames).catch(function (err) {
             return console.error(err.toString());
         });
     });

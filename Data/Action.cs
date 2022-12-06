@@ -7,6 +7,7 @@
         DELETE_CHATROOM,
         ADD_USERS,
         REMOVE_USERS,
-        GLOBALLY_MUTE_USERS
+        GLOBALLY_MUTE_USERS,
+        GLOBALLY_UNMUTE_USERS
     }
 }

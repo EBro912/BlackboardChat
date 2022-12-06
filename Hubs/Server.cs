@@ -23,15 +23,39 @@ namespace BlackboardChat.Hubs
             await Clients.All.SendAsync("DeleteMessage", id);
         }
 
-        public async Task GloballyMuteUsers(string[] users, string[] usernames)
+        public async Task GloballyMuteUsers(string[] add, string[] remove, string[] addUsernames, string[] removeUsernames)
         {
-            // reset the mutes back to default
-            await Database.ResetMutes();
-            foreach (string s in users)
-                await Database.SetUserAsGloballyMuted(int.Parse(s));
-            string message = $"<b>The following users were globally muted:</b> {string.Join(", ", usernames)}";
-            await Database.AddLogEntry(Action.GLOBALLY_MUTE_USERS, DateTime.Now, message);
-            await Clients.All.SendAsync("SetUsersAsGloballyMuted", users);
+            List<string> logAdd = new List<string>();
+            List<string> logRemove = new List<string>();
+            var existing = await Database.GetGloballyMutedUsers();
+            List<string> members = existing.Select(x => x.Id.ToString()).ToList();
+            for (int i = 0; i < add.Length; i++)
+            {
+                if (!members.Contains(add[i]))
+                {
+                    await Database.SetUserIsGloballyMuted(int.Parse(add[i]), true);
+                    logAdd.Add(addUsernames[i]);
+                }
+            }
+            for (int i = 0; i < remove.Length; i++)
+            {
+                if (members.Contains(remove[i]))
+                {
+                    await Database.SetUserIsGloballyMuted(int.Parse(remove[i]), false);
+                    logRemove.Add(removeUsernames[i]);
+                }
+            }
+            if (logAdd.Count > 0)
+            {
+                string message = $"<b>The following users were globally muted:</b> {string.Join(", ", logAdd)}";
+                await Database.AddLogEntry(Action.GLOBALLY_MUTE_USERS, DateTime.Now, message);
+            }
+            if (logRemove.Count > 0)
+            {
+                string message = $"<b>The following users were globally unmuted:</b> {string.Join(", ", logRemove)}";
+                await Database.AddLogEntry(Action.GLOBALLY_UNMUTE_USERS, DateTime.Now, message);
+            }
+            await Clients.All.SendAsync("SetUsersAsGloballyMuted", add);
         }
 
         public async Task UpdateLocallyMutedMembers(int channelId, string[] users)
@@ -132,10 +156,8 @@ namespace BlackboardChat.Hubs
                 List<string> members = channel.Members.Split(',').ToList();
                 for (int i = 0; i < add.Length; i++)
                 {
-                    Console.WriteLine($"testing {add[i]}");
                     if (!members.Contains(add[i]))
                     {
-                        Console.WriteLine($"adding {add[i]}");
                         members.Add(add[i]);
                         logAdd.Add(addUsernames[i]);
                     }

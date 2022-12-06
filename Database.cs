@@ -122,17 +122,17 @@ namespace BlackboardChat
             return await connection.QueryFirstOrDefaultAsync<Message>("SELECT * FROM Messages WHERE rowid = @Id", parameters);
         }
 
-        public static async Task ResetMutes()
+        public static async Task<IEnumerable<User>> GetGloballyMutedUsers()
         {
             using var connection = new SqliteConnection(name);
-            await connection.ExecuteAsync("UPDATE Users SET IsGloballyMuted = 0");
+            return await connection.QueryAsync<User>("SELECT * FROM Users WHERE IsGloballyMuted = 1");
         }
 
-        public static async Task SetUserAsGloballyMuted(int userId)
+        public static async Task SetUserIsGloballyMuted(int userId, bool value)
         {
             using var connection = new SqliteConnection(name);
-            var parameters = new { Id = userId };
-            await connection.ExecuteAsync("UPDATE Users SET IsGloballyMuted = 1 WHERE rowid = @Id", parameters);
+            var parameters = new { Id = userId, Muted = value ? 1 : 0};
+            await connection.ExecuteAsync("UPDATE Users SET IsGloballyMuted = @Muted WHERE rowid = @Id", parameters);
         }
 
 
