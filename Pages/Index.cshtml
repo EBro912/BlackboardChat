@@ -27,11 +27,17 @@
                                 </div>
                                 <div class="modal-body">
                                     <button class="btn btn-success" type="button" data-dismiss="modal" data-toggle="modal" id="addChannel">Add Chat Room</button>
+                                    <br />
                                     <button class="btn btn-success" type="button" data-dismiss="modal" data-toggle="modal" id="addForumChannel">Add Forum Chat</button>
+                                    <br />
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="openLog">Open log</button>
+                                    <br />
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="editUsers">Edit Chat Room Users</button>
+                                    <br />
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="muteUsersGlobally">Mute/Unmute Users Globally</button>
+                                    <br />
                                     <button class="btn btn-primary" type="button" data-dismiss="modal" data-toggle="modal" id="muteUsersLocally">Mute/Unmute Users in Current Channel</button>
+                                    <br />
                                     <button class="btn btn-danger" type="button" data-dismiss="modal" data-toggle="modal" id="deleteChatroom">Delete Chatroom</button>
                                 </div>
                                 <div class="modal-footer">
@@ -47,9 +53,7 @@
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h5 class="modal-title" id="logScrollTest">Log</h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
-                                    </button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body" id="logbody">
                                     <!-- log messages go here -->
@@ -228,8 +232,8 @@
             </div>
             <!-- 8 column div for chatbox that shows messages -->
             <div class="col-8">
+                <!-- New messages will go here -->
                 <div id="chatbox">
-                    <!-- New messages will go here -->
                 </div>
                 <div id="messagebox">
                     <textarea maxlength="1000" id="messageInput" name="messageInput" placeholder="New Message:"></textarea>

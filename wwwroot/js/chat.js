@@ -35,67 +35,86 @@ function addMessage(message) {
     // only display messages sent in the current channel
     // TODO (maybe): some sort of notification/unread system for other channels
     if (message.channel === channelCache.id) {
-        var isLocalUser = message.author === localUser.id;
-        var sender = (isLocalUser ? 'You' : userCache.at(message.author - 1).name);
+        // if message is not a forum topic
+        if (message.author != -1) {
+            var isLocalUser = message.author === localUser.id;
+            var sender = (isLocalUser ? 'You' : userCache.at(message.author - 1).name);
 
-        // create div for message
-        var messagebox = $("<div class ='messagediv' id ='message'></div>");
-        messagebox.addClass(isLocalUser ? 'user' : 'otheruser');
-        messagebox.attr('id', `message_${message.id}`);
+            // create div for message
+            var messagebox = $("<div class ='messagediv' id ='message'></div>");
+            messagebox.addClass(isLocalUser ? 'user' : 'otheruser');
+            messagebox.attr('id', `message_${message.id}`);
 
-     
-        if (message.isDeleted) {
-            // if the message is already deleted, then show it as deleted to the professor
-            // for students just dont show it at all
-            if (localUser.isProfessor)
-                messagebox.addClass('deleted');
-            else
-                return;
-        }
 
-        // only append delete button to div if user is the professor or if the user is the message author
-        // and if the message isn't already deleted
-        if ((localUser.isProfessor && !message.isDeleted) || (message.author === localUser.id && !message.isDeleted)) {
-            // create button to allow message deletion
-            var deletebutton = document.createElement('input');
-            deletebutton.setAttribute('class', 'deletebutton');
-            deletebutton.setAttribute('value', '\u{2716}');
-            deletebutton.setAttribute('type', 'button');
-            deletebutton.addEventListener('click', function () {
-                // convert message id to a number
-                let num = Number.parseInt($(this).parent().attr('id').split('_')[1]);
-                // pass this function our name to save a database call
-                connection.invoke("RequestDeleteMessage", num, localUser.name).catch(function (err) {
-                    return console.error(err.toString());
+            if (message.isDeleted) {
+                // if the message is already deleted, then show it as deleted to the professor
+                // for students just dont show it at all
+                if (localUser.isProfessor)
+                    messagebox.addClass('deleted');
+                else
+                    return;
+            }
+
+            // only append delete button to div if user is the professor or if the user is the message author
+            // and if the message isn't already deleted
+            if ((localUser.isProfessor && !message.isDeleted) || (message.author === localUser.id && !message.isDeleted)) {
+                // create button to allow message deletion
+                var deletebutton = document.createElement('input');
+                deletebutton.setAttribute('class', 'deletebutton');
+                deletebutton.setAttribute('value', '\u{2716}');
+                deletebutton.setAttribute('type', 'button');
+                deletebutton.addEventListener('click', function () {
+                    // convert message id to a number
+                    let num = Number.parseInt($(this).parent().attr('id').split('_')[1]);
+                    // pass this function our name to save a database call
+                    connection.invoke("RequestDeleteMessage", num, localUser.name).catch(function (err) {
+                        return console.error(err.toString());
+                    });
                 });
-            });
 
-            messagebox.append(deletebutton);
+                messagebox.append(deletebutton);
+            }
+
+            // create message sender
+            var messagesender = document.createElement('text');
+            messagesender.setAttribute('class', 'messagesender');
+            messagesender.innerText = sender;
+
+            // create message header
+            var messageheader = document.createElement('text');
+            messageheader.setAttribute('class', 'messageheader');
+            messageheader.innerText = " (" + createDateString(new Date(Date.parse(message.timestamp))) + ") :\n";
+
+            // create message text
+            var messagetext = document.createElement('text');
+            messagetext.setAttribute('class', 'message');
+            messagetext.innerText = message.content;
+
+            // append button and text to div
+            messagebox.append(messagesender);
+            messagebox.append(messageheader);
+            messagebox.append(messagetext);
+
+            // append message box and break
+            var chat = $("#chatbox");
+            chat.append(messagebox)
+            return;
         }
+        // forum topic message creation
 
-        // create message sender
-        var messagesender = document.createElement('text');
-        messagesender.setAttribute('class', 'messagesender');
-        messagesender.innerText = sender;
+        // create div for topic
+        var topicbox = $("<div class ='topicbox' id ='topic'></div>");
+        topicbox.attr('id', `message_${message.id}`);
 
-        // create message header
-        var messageheader = document.createElement('text');
-        messageheader.setAttribute('class', 'messageheader');
-        messageheader.innerText = " (" + createDateString(new Date(Date.parse(message.timestamp))) + ") :\n";
+        // create text for topic
+        var topictext = document.createElement('text');
+        topictext.setAttribute('class', 'topictext');
+        topictext.innerText = "Forum Topic: " + message.content;
 
-        // create message text
-        var messagetext = document.createElement('text');
-        messagetext.setAttribute('class', 'message');
-        messagetext.innerText = message.content;
-
-        // append button and text to div
-        messagebox.append(messagesender);
-        messagebox.append(messageheader);
-        messagebox.append(messagetext);
-
-        // append message box and break
+        // append text and div
+        topicbox.append(topictext);
         var chat = $("#chatbox");
-        chat.append(messagebox)
+        chat.append(topicbox)
     }
 }
 
@@ -240,6 +259,7 @@ connection.on("SetUsersAsGloballyMuted", function (users) {
     }
 });
 
+// sync messages with the server
 // sync messages with the server
 connection.on("SyncChannelMessages", function (messages) {
     messages.forEach(x => {

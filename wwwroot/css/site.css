@@ -42,6 +42,7 @@ a {
     overflow-wrap: anywhere;
     display: flex;
     flex-direction: column;
+    padding-top:0px
 }
 
 #messagebox {
@@ -175,9 +176,11 @@ nav {
 }
 
 #logbody {
-    height:70vh;
+    height: 70vh;
     overflow-y: auto;
     overflow-wrap: anywhere;
+    background-color: #646464;
+    color:white;
 }
 
 /*styling to make site actually display fullscreen*/
@@ -194,4 +197,54 @@ nav {
 
 .col-2, .col-8 {
     height: 95vh !important;
+}
+
+.topicbox {
+    background-color: #fcc304;
+    text-align: center;
+    font-weight: bolder;
+    display: inline;
+    width: 100%;
+    margin-bottom: 5px;
+    margin-top: 0px;
+    position: sticky;
+    top: 0px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+#logbody p {
+    border:solid;
+    border-top:0px;
+    border-left:0px;
+    border-right:0px;
+    border-width:3px;
+    padding-bottom:10px;
+}
+
+.btn {
+    width:100%;
+    margin-bottom:7px;
+}
+
+.modal-header, .modal-body, .modal-footer{
+    background-color: #646464;
+    color: white;
+}
+
+.modal-body input  {
+    background-color: #646464;
+    color: white;
+}
+
+.modal-body label {
+    color:white !important;
+}
+
+.form-check-input {
+    border-color:white;
+}
+
+#profSettings, #buttonlist {
+    width:100%;
 }

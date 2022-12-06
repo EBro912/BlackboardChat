@@ -151,7 +151,12 @@ namespace BlackboardChat.Hubs
             channel = await Database.GetChannelByName(name);
             string message = $"<b>{creator} created forum chat room {name} with the following topic:</b> \"{topic}\"";
             await Database.AddLogEntry(Action.CREATE_CHATROOM, DateTime.Now, message);
-            await Clients.All.SendAsync("CreateChannel", channel);
+            await Clients.All.SendAsync("CreateChannel", channel); 
+
+            // create message with author of -1 for forum topic msg
+            await Database.AddMessage(channel.Id, -1, topic, DateTime.Now);
+            Message msg = await Database.GetMostRecentMessage(-1);
+            await Clients.All.SendAsync("ReceiveMessage", msg);
         }
 
         public async Task AddProfUserChannel(User x)
