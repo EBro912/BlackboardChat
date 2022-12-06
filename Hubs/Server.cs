@@ -58,14 +58,44 @@ namespace BlackboardChat.Hubs
             await Clients.All.SendAsync("SetUsersAsGloballyMuted", add);
         }
 
-        public async Task UpdateLocallyMutedMembers(int channelId, string[] users)
+        public async Task UpdateLocallyMutedMembers(int channelId, string[] add, string[] remove, string[] addUsernames, string[] removeUsernames)
         {
             Channel channel = await Database.GetChannelById(channelId);
+            // arrays to log users with
+            List<string> logAdd = new List<string>();
+            List<string> logRemove = new List<string>();
             if (channel != null)
-            {         
-                string updated = string.Join(',', users);
+            {
+                List<string> members = channel.MutedMembers.Split(',').ToList();
+                for (int i = 0; i < add.Length; i++)
+                {
+                    if (!members.Contains(add[i]))
+                    {
+                        members.Add(add[i]);
+                        logAdd.Add(addUsernames[i]);
+                    }
+                }
+                for (int i = 0; i < remove.Length; i++)
+                {
+                    if (members.Contains(remove[i]))
+                    {
+                        members.Remove(remove[i]);
+                        logRemove.Add(removeUsernames[i]);
+                    }
+                }
+                string updated = string.Join(',', members);
                 channel.MutedMembers = updated;
                 await Database.UpdateChannelMutedMembers(channel.Id, updated);
+                if (logAdd.Count > 0)
+                {
+                    string message = $"<b>The following members were muted in {channel.Name}:</b> {string.Join(", ", logAdd)}";
+                    await Database.AddLogEntry(Action.LOCALLY_MUTE_USERS, DateTime.Now, message);
+                }
+                if (logRemove.Count > 0)
+                {
+                    string message = $"<b>The following members were unmuted in {channel.Name}:</b> {string.Join(", ", logRemove)}";
+                    await Database.AddLogEntry(Action.LOCALLY_UNMUTE_USERS, DateTime.Now, message);
+                }
                 await Clients.All.SendAsync("UpdateChannelMutes", channel);
             }
         }

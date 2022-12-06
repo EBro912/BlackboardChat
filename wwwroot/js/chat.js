@@ -553,11 +553,22 @@ $(document).ready(function () {
     });
 
     $("#confirmMuteLocally").on('click', function (e) {
-        var users = [];
-        $('#muteLocallyInputHolder input:checked').each(function () {
-            users.push($(this).attr('id').substring(4));
+        var add = [];
+        var remove = [];
+        var addUsernames = [];
+        var removeUsernames = [];
+        $('#muteLocallyInputHolder input').each(function () {
+            let id = $(this).attr('id').substring(4);
+            if ($(this).is(':checked')) {
+                add.push(id);
+                addUsernames.push(userCache.at(id - 1).name);
+            }
+            else {
+                remove.push(id);
+                removeUsernames.push(userCache.at(id - 1).name);
+            }
         });
-        connection.invoke("UpdateLocallyMutedMembers", channelCache.id, users).catch(function (err) {
+        connection.invoke("UpdateLocallyMutedMembers", channelCache.id, add, remove, addUsernames, removeUsernames).catch(function (err) {
             return console.error(err.toString());
         });
     });
@@ -566,10 +577,6 @@ $(document).ready(function () {
         connection.invoke("RequestLog").catch(function (err) {
             return console.error(err.toString());
         });
-    });
-
-    $('#logModal').on('show.bs.modal', function (e) {
-        // TODO
     });
 
 
