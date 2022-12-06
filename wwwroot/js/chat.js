@@ -174,6 +174,10 @@ connection.on("RemoveChannel", function (channel) {
 });
 
 connection.on("UpdateChannel", function (channel) {
+    // reload user sidebar if we are looking at the channel being updated
+    if (channelCache.id === channel.id) {
+        changeChannel(channelCache.id);
+    }
     if (localUser.isProfessor) return;
     if (channel.members.split(',').includes(localUser.id.toString())) {
         // if we can already see the channel then do nothing
@@ -444,9 +448,13 @@ $(document).ready(function () {
         let name = $('#roomName').val();
         if (name === null)
             return;
+        if (name.length === 0) {
+            alert("Channel name must not be empty.");
+            return;
+        }
         name = name.replaceAll(' ', '-');
-        if (name.length > 50) {
-            alert("Channel name must be shorter than 50 characters.");
+        if (name.length > 25) {
+            alert("Channel name must be shorter than 25 characters.");
             return;
         }
         // professor is always included
