@@ -29,25 +29,26 @@ a {
 }
 
 #chatbox {
-    border-color: black;
+    border-color: white;
     border: 5px;
     border-style: solid;
     border-radius: 5px;
     height: 90vh;
     text-align: left;
     padding-top: 10px;
-    background-color: lightslategray;
+    /*background-color: lightslategray;     original styling*/
+    background-color: #646464;
     overflow-y: auto;
-    overflow-wrap:anywhere;
-    display:flex;
-    flex-direction:column;
+    overflow-wrap: anywhere;
+    display: flex;
+    flex-direction: column;
 }
 
 #messagebox {
     background-color: lightsteelblue;
     float: inline-end;
     height: 10vh;
-    border-color: black;
+    border-color: white;
     border: 5px;
     border-style: solid;
     border-radius: 5px;
@@ -56,7 +57,9 @@ a {
 }
 
 textarea {
-    background-color: lightsteelblue;
+    /*background-color: lightsteelblue;     original styling*/
+    background-color: #fbfbfb;
+    color:black;
     border-style: none;
     width: 100%;
     height: 100%;
@@ -77,7 +80,8 @@ nav {
     text-align: center;
     border: 5px;
     border-radius: 5px;
-    background-image: linear-gradient(darkblue, blue);
+    /*background-image: linear-gradient(darkblue, blue);*/
+    background-color: #0864b4;
     overflow-y: auto;
 }
 
@@ -119,12 +123,14 @@ nav {
     text-align: center;
     border: 5px;
     border-radius: 5px;
-    background-image: linear-gradient(darkblue, blue);
+    /*background-image: linear-gradient(darkblue, blue); original styling*/
+    background-color: #0864b4;
     overflow-y: auto;
 }
 
 .users:hover {
-    background-image: linear-gradient(teal, blue);
+    /*background-image: linear-gradient(teal, blue); original styling*/
+    background-color: #383434;
 }
 
 .modal-header {
