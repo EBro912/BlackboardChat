@@ -12,6 +12,9 @@
         // whether or not the channel is a forum channel
         public bool IsForum { get; set; }
 
+        // the topic of the channel, if the channel is a forum channel
+        public string? Topic { get; set; }
+
         // a comma separated list of user IDs that can see this channel
         // since SQL doesn't support arrays, we have to use a string to store this
         public string? Members { get; set; }

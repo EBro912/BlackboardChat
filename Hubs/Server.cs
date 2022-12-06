@@ -141,6 +141,19 @@ namespace BlackboardChat.Hubs
             await Clients.All.SendAsync("CreateChannel", channel);
         }
 
+        public async Task AddForumChannel(string name, string topic, string creator)
+        {
+            Channel channel = await Database.GetChannelByName(name);
+            if (channel != null) { return; }
+            // all students are added to the forum by default
+            await Database.AddChannel(name, true, "1,2,3,4,5,6,7,8,9,10,11", topic);
+            // after creating the channel in the database, get its row id to be sent back
+            channel = await Database.GetChannelByName(name);
+            string message = $"<b>{creator} created forum chat room {name} with the following topic:</b> \"{topic}\"";
+            await Database.AddLogEntry(Action.CREATE_CHATROOM, DateTime.Now, message);
+            await Clients.All.SendAsync("CreateChannel", channel);
+        }
+
         public async Task AddProfUserChannel(User x)
         {
             // TODO: handle adding members to a channel

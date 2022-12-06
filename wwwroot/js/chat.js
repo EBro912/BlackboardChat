@@ -122,15 +122,15 @@ function createDateString(date) {
 }
 
 // Helper function to create a channel
-function addChannel(id, name) {
+function addChannel(channel) {
+    // TODO: handle showing forum topic once implemented
     var button = document.createElement("button");
     button.type = "button";
     button.className = "btn btn-info";
-    button.id = `channelID_${id}`;
-    button.onclick = function () { changeChannel(id); };
-    button.innerText = name;
-    let addButton = document.getElementById("addChannel");
-    document.getElementById("buttonlist").insertBefore(button, addButton);
+    button.id = `channelID_${channel.id}`;
+    button.onclick = function () { changeChannel(channel.id); };
+    button.innerText = channel.name;
+    $('#buttonlist').append(button);
 }
 
 // When a message is received by the server, display it
@@ -159,7 +159,7 @@ connection.on("CreateChannel", function (channel) {
     // convert the database's member storage into an actual array of user IDs
     // and check if we actually have permission to see this channel
     if (channel.members.split(',').includes(localUser.id.toString())) {
-        addChannel(channel.id, channel.name);
+        addChannel(channel);
     }
 });
 
@@ -183,7 +183,7 @@ connection.on("UpdateChannel", function (channel) {
         // if we can already see the channel then do nothing
         if ($(`#channelID_${channel.id}`).length)
             return;
-        addChannel(channel.id, channel.name);
+        addChannel(channel);
     }
     else {
         if ($(`#channelID_${channel.id}`).length) {
@@ -278,7 +278,7 @@ connection.on("SyncChannels", function (channels) {
         // convert the database's member storage into an actual array of user IDs
         // and check if we actually have permission to see this channel
         if (x.members.split(',').includes(localUser.id.toString())) {
-            addChannel(x.id, x.name);
+            addChannel(x);
         }
     });
 });
@@ -388,6 +388,32 @@ $(document).ready(function () {
     $('#addForumChannel').on('click', function (e) {
         $('#addForumChannelModal').modal('toggle');
     });
+
+    $('#confirmCreateForum').on('click', function (e) {
+        let name = $('#forumRoomName').val();
+        if (name === null)
+            return;
+        if (name.length === 0) {
+            alert("Channel name must not be empty.");
+            return;
+        }
+        name = name.replaceAll(' ', '-');
+        if (name.length > 25) {
+            alert("Channel name must be shorter than 25 characters.");
+            return;
+        }
+        let topic = $('#topic').val();
+        if (topic === null)
+            return;
+        if (topic.length === 0) {
+            alert("Topic must not be empty.");
+            return;
+        }
+        connection.invoke("AddForumChannel", name, topic, localUser.name).catch(function (err) {
+            return console.error(err.toString());
+        });
+    });
+
 
     $('#editUsers').on('click', function (e) {
         if (channelCache.id == 1) {

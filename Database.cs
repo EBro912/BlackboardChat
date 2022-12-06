@@ -36,6 +36,7 @@ namespace BlackboardChat
                 + "Id INTEGER PRIMARY KEY,"
                 + "Name VARCHAR(50) UNIQUE NOT NULL,"
                 + "IsForum TINYINT NOT NULL,"
+                + "Topic VARCHAR(10000) DEFAULT NULL,"
                 // this character limit should never be reached but give plenty of room just in case
                 + "Members VARCHAR(10000) NOT NULL,"
                 + "MutedMembers VARCHAR(10000) NOT NULL);");
@@ -92,12 +93,12 @@ namespace BlackboardChat
         }
 
         // inserts a new channel into the database
-        public static async Task AddChannel(string? channelName, bool isForum, string? members)
+        public static async Task AddChannel(string? channelName, bool isForum, string? members, string? topic = null)
         {
             using var connection = new SqliteConnection(name);
-            var parameters = new { Name = channelName, IsForum = isForum, Members = members };
-            await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Members, MutedMembers)" +
-                "VALUES (@Name, @IsForum, @Members, '');", parameters);
+            var parameters = new { Name = channelName, IsForum = isForum, Members = members, Topic = topic };
+            await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Topic, Members, MutedMembers)" +
+                "VALUES (@Name, @IsForum, @Topic, @Members, '');", parameters);
         }
 
         // gets a user's most recent message
