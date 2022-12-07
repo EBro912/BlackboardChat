@@ -334,12 +334,11 @@ connection.on("LoginSuccessful", function (user) {
         document.getElementById("addChannel").hidden = false;
         document.getElementById("profSettings").hidden = false;
     }
-    else
+    else {
         document.getElementById("requestChat").hidden = false;
         document.getElementById("studSettings").hidden = false;
     }
 });
-   
 
 // Once we are connected to the server, enable the message box
 connection.start().then(function () {
