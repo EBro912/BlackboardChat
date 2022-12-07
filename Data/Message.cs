@@ -13,5 +13,7 @@
         public string? Content { get; set; }
         // when the message was sent
         public DateTime Timestamp { get; set; }
+        // if the message has been deleted
+        public bool IsDeleted { get; set; }
     }
 }

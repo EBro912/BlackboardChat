@@ -1,5 +1,6 @@
 ﻿using BlackboardChat.Data;
 using Microsoft.AspNetCore.SignalR;
+using Action = BlackboardChat.Data.Action;
 
 namespace BlackboardChat.Hubs
 {
@@ -7,9 +8,98 @@ namespace BlackboardChat.Hubs
     {
         public async Task SendMessage(int channelID, int userID, string message)
         {
-            await Clients.All.SendAsync("ReceiveMessage", channelID, userID, message);
             await Database.AddMessage(channelID, userID, message, DateTime.Now);
+            Message msg = await Database.GetMostRecentMessage(userID);
+            await Clients.All.SendAsync("ReceiveMessage", msg);
         }
+
+        public async Task RequestDeleteMessage(int id, string deleter)
+        {
+            await Database.SetMessageAsDeleted(id);
+            Message msg = await Database.GetMessageById(id);
+            User target = await Database.GetUserById(msg.Author);
+            string message = $"<b>{deleter} deleted a message from {target.Name}:</b> \"{msg.Content}\"";
+            await Database.AddLogEntry(Action.DELETE_MESSAGE, DateTime.Now, message);
+            await Clients.All.SendAsync("DeleteMessage", id);
+        }
+
+        public async Task GloballyMuteUsers(string[] add, string[] remove, string[] addUsernames, string[] removeUsernames)
+        {
+            List<string> logAdd = new List<string>();
+            List<string> logRemove = new List<string>();
+            var existing = await Database.GetGloballyMutedUsers();
+            List<string> members = existing.Select(x => x.Id.ToString()).ToList();
+            for (int i = 0; i < add.Length; i++)
+            {
+                if (!members.Contains(add[i]))
+                {
+                    await Database.SetUserIsGloballyMuted(int.Parse(add[i]), true);
+                    logAdd.Add(addUsernames[i]);
+                }
+            }
+            for (int i = 0; i < remove.Length; i++)
+            {
+                if (members.Contains(remove[i]))
+                {
+                    await Database.SetUserIsGloballyMuted(int.Parse(remove[i]), false);
+                    logRemove.Add(removeUsernames[i]);
+                }
+            }
+            if (logAdd.Count > 0)
+            {
+                string message = $"<b>The following users were globally muted:</b> {string.Join(", ", logAdd)}";
+                await Database.AddLogEntry(Action.GLOBALLY_MUTE_USERS, DateTime.Now, message);
+            }
+            if (logRemove.Count > 0)
+            {
+                string message = $"<b>The following users were globally unmuted:</b> {string.Join(", ", logRemove)}";
+                await Database.AddLogEntry(Action.GLOBALLY_UNMUTE_USERS, DateTime.Now, message);
+            }
+            await Clients.All.SendAsync("SetUsersAsGloballyMuted", add);
+        }
+
+        public async Task UpdateLocallyMutedMembers(int channelId, string[] add, string[] remove, string[] addUsernames, string[] removeUsernames)
+        {
+            Channel channel = await Database.GetChannelById(channelId);
+            // arrays to log users with
+            List<string> logAdd = new List<string>();
+            List<string> logRemove = new List<string>();
+            if (channel != null)
+            {
+                List<string> members = channel.MutedMembers.Split(',').ToList();
+                for (int i = 0; i < add.Length; i++)
+                {
+                    if (!members.Contains(add[i]))
+                    {
+                        members.Add(add[i]);
+                        logAdd.Add(addUsernames[i]);
+                    }
+                }
+                for (int i = 0; i < remove.Length; i++)
+                {
+                    if (members.Contains(remove[i]))
+                    {
+                        members.Remove(remove[i]);
+                        logRemove.Add(removeUsernames[i]);
+                    }
+                }
+                string updated = string.Join(',', members);
+                channel.MutedMembers = updated;
+                await Database.UpdateChannelMutedMembers(channel.Id, updated);
+                if (logAdd.Count > 0)
+                {
+                    string message = $"<b>The following members were muted in {channel.Name}:</b> {string.Join(", ", logAdd)}";
+                    await Database.AddLogEntry(Action.LOCALLY_MUTE_USERS, DateTime.Now, message);
+                }
+                if (logRemove.Count > 0)
+                {
+                    string message = $"<b>The following members were unmuted in {channel.Name}:</b> {string.Join(", ", logRemove)}";
+                    await Database.AddLogEntry(Action.LOCALLY_UNMUTE_USERS, DateTime.Now, message);
+                }
+                await Clients.All.SendAsync("UpdateChannelMutes", channel);
+            }
+        }
+
 
         public async Task RequestChannelMessages(int id)
         {
@@ -39,16 +129,34 @@ namespace BlackboardChat.Hubs
             await Clients.Caller.SendAsync("SyncChannels", channels.ToList());
         }
 
-        public async Task AddChannel(string name)
+        public async Task AddChannel(string name, string[] members, string creator, string[] usernames)
         {
-            // TODO: handle adding members to a channel
-            // all users can see new channels for now, this should be fixed
             Channel channel = await Database.GetChannelByName(name);
             if (channel != null) { return; }
-            await Database.AddChannel(name, false, "1,2,3,4,5,6,7,8,9,10,11");
+            await Database.AddChannel(name, false, string.Join(',', members));
             // after creating the channel in the database, get its row id to be sent back
             channel = await Database.GetChannelByName(name);
+            string message = $"<b>{creator} created chat room {name} with the following users:</b> {string.Join(", ", usernames)}";
+            await Database.AddLogEntry(Action.CREATE_CHATROOM, DateTime.Now, message);
             await Clients.All.SendAsync("CreateChannel", channel);
+        }
+
+        public async Task AddForumChannel(string name, string topic, string creator)
+        {
+            Channel channel = await Database.GetChannelByName(name);
+            if (channel != null) { return; }
+            // all students are added to the forum by default
+            await Database.AddChannel(name, true, "1,2,3,4,5,6,7,8,9,10,11", topic);
+            // after creating the channel in the database, get its row id to be sent back
+            channel = await Database.GetChannelByName(name);
+            string message = $"<b>{creator} created forum chat room {name} with the following topic:</b> \"{topic}\"";
+            await Database.AddLogEntry(Action.CREATE_CHATROOM, DateTime.Now, message);
+            await Clients.All.SendAsync("CreateChannel", channel); 
+
+            // create message with author of -1 for forum topic msg
+            await Database.AddMessage(channel.Id, -1, topic, DateTime.Now);
+            Message msg = await Database.GetMostRecentMessage(-1);
+            await Clients.All.SendAsync("ReceiveMessage", msg);
         }
 
         public async Task AddProfUserChannel(User x)
@@ -65,73 +173,74 @@ namespace BlackboardChat.Hubs
             await Clients.All.SendAsync("CreateChannel", channel);
         }
 
-        public async Task RequestUsersInChannel(int channelId)
+        public async Task RequestCurrentChannel(int channelId)
         {
-            // edge case, 0 is the default channel which isnt in the database and everyone can see
-            // so just return everyone
-            if (channelId == 0)
-            {
-                await Clients.Caller.SendAsync("SyncChannelUsers", "1,2,3,4,5,6,7,8,9,10,11");
-            }
-            else
-            {
-                Channel channel = await Database.GetChannelById(channelId);
-                await Clients.Caller.SendAsync("SyncChannelUsers", channel.Members);
-            }
+            Channel channel = await Database.GetChannelById(channelId);
+            await Clients.Caller.SendAsync("SyncCurrentChannel", channel);
         }
 
-        public async Task DeleteChannel(string channelName)
+        public async Task DeleteChannel(int channelID, string deleter)
         {
-            // prevent deleting the default chat room
-            if (channelName == "open-chat")
-                return;
-            Channel channel = await Database.GetChannelByName(channelName);
+            Channel channel = await Database.GetChannelById(channelID);
             if (channel != null)
             {
                 // delete the chat room and the messages that were in the chat room
                 await Database.DeleteChannel(channel.Id);
                 await Database.DeleteMessagesInChannel(channel.Id);
+                string message = $"<b>{deleter} deleted chat room {channel.Name}</b>";
+                await Database.AddLogEntry(Action.DELETE_CHATROOM, DateTime.Now, message);
                 await Clients.All.SendAsync("RemoveChannel", channel);
             }
         }
 
-        public async Task AddUserToChannel(int channelId, string name)
+        public async Task UpdateUsersInChannel(int channelId, string[] add, string[] remove, string[] addUsernames, string[] removeUsernames)
         {
-            User user = await Database.GetUserByName(name);
-            if (user != null)
+            Channel channel = await Database.GetChannelById(channelId);
+            // arrays to log users with
+            List<string> logAdd = new List<string>();
+            List<string> logRemove = new List<string>();
+            if (channel != null)
             {
-                Channel channel = await Database.GetChannelById(channelId);
-                // only update the channel list if the user doesn't exist in the member list
-                if (channel.Members != null && !channel.Members.Split(',').Contains(user.Id.ToString()))
+                List<string> members = channel.Members.Split(',').ToList();
+                for (int i = 0; i < add.Length; i++)
                 {
-                    channel.Members += "," + user.Id;
-                    await Database.UpdateChannelMembers(channel.Id, channel.Members);
-                    await Clients.All.SendAsync("CreateChannel", channel);
+                    if (!members.Contains(add[i]))
+                    {
+                        members.Add(add[i]);
+                        logAdd.Add(addUsernames[i]);
+                    }
                 }
+                for (int i = 0; i < remove.Length; i++)
+                {
+                    if (members.Contains(remove[i]))
+                    {
+                        members.Remove(remove[i]);
+                        logRemove.Add(removeUsernames[i]);
+                    }
+                }
+                string updated = string.Join(',', members);
+                channel.Members = updated;
+                await Database.UpdateChannelMembers(channel.Id, updated);
+                if (logAdd.Count > 0)
+                {
+                    string message = $"<b>The following members were added to {channel.Name}:</b> {string.Join(", ", logAdd)}";
+                    await Database.AddLogEntry(Action.ADD_USERS, DateTime.Now, message);
+                }
+                if (logRemove.Count > 0)
+                {
+                    string message = $"<b>The following members were removed from {channel.Name}:</b> {string.Join(", ", logRemove)}";
+                    await Database.AddLogEntry(Action.REMOVE_USERS, DateTime.Now, message);
+                }
+                await Clients.All.SendAsync("UpdateChannel", channel);
             }
         }
 
-        public async Task RemoveUserFromChannel(int channelId, string name)
+        public async Task RequestLog()
         {
-            User user = await Database.GetUserByName(name);
-            // prevent the professor from removing themselves
-            if (user != null && !user.IsProfessor)
-            {
-                Channel channel = await Database.GetChannelById(channelId);
-                if (channel.Members != null)
-                {
-                    List<string> members = channel.Members.Split(',').ToList();
-                    // only update the channel list if the user exists in the member list
-                    if (members.Contains(user.Id.ToString()))
-                    {
-                        // since we aren't adding, we have to do some finagling to make sure the format of the member string stays the same
-                        members.Remove(user.Id.ToString());
-                        channel.Members = string.Join(',', members);
-                        await Database.UpdateChannelMembers(channel.Id, channel.Members);
-                        await Clients.All.SendAsync("RemoveChannelForId", channel, user.Id);
-                    }
-                }
-            }
+            var log = await Database.GetLog();
+            await Clients.Caller.SendAsync("UpdateLog", log.ToList());
         }
-    }
+
+
+    }    
 }

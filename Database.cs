@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.Sqlite;
 using Dapper;
 using BlackboardChat.Data;
+using Action = BlackboardChat.Data.Action;
 
 namespace BlackboardChat
 {
@@ -17,7 +18,8 @@ namespace BlackboardChat
             connection.Execute("CREATE TABLE IF NOT EXISTS Users ("
                 + "Id INTEGER PRIMARY KEY,"
                 + "Name VARCHAR(100) UNIQUE NOT NULL,"
-                + "IsProfessor TINYINT NOT NULL);");
+                + "IsProfessor TINYINT NOT NULL," 
+                + "IsGloballyMuted TINYINT(1) NOT NULL DEFAULT 0);");
 
             // create the Messages table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Messages ("
@@ -26,29 +28,43 @@ namespace BlackboardChat
                 + "Author INT NOT NULL,"
                 // leave some extra character space just in case
                 + "Content VARCHAR(1010) NOT NULL,"
-                + "TimeStamp DATETIME NOT NULL);");
+                + "TimeStamp DATETIME NOT NULL,"
+                + "IsDeleted TINYINT(1) NOT NULL);");
 
             // create the Channels table if it doesn't already exist
             connection.Execute("CREATE TABLE IF NOT EXISTS Channels ("
                 + "Id INTEGER PRIMARY KEY,"
                 + "Name VARCHAR(50) UNIQUE NOT NULL,"
                 + "IsForum TINYINT NOT NULL,"
+                + "Topic VARCHAR(10000) DEFAULT NULL,"
                 // this character limit should never be reached but give plenty of room just in case
-                + "Members VARCHAR(10000) NOT NULL);");
+                + "Members VARCHAR(10000) NOT NULL,"
+                + "MutedMembers VARCHAR(10000) NOT NULL);");
+
+            // create the Log table if it doesn't already exist
+            connection.Execute("CREATE TABLE IF NOT EXISTS Log ("
+                + "Id INTEGER PRIMARY KEY,"
+                + "Action INTEGER NOT NULL,"
+                + "TimeStamp DATETIME NOT NULL,"
+                + "Message VARCHAR(10000) NOT NULL);");
 
             // removes all existing channels for testing purposes
             // comment this out if you want to keep the channels made
-            //connection.Execute("DELETE FROM Channels");
+            connection.Execute("DELETE FROM Channels");
 
             // removes all existing messages for testing purposes
             // comment this out if you want to keep the messages sent
-            //connection.Execute("DELETE FROM Messages");
+            connection.Execute("DELETE FROM Messages");
+
+            // removes all existing log messages for testing purposes
+            // comment this out if you want to keep the log messages entered
+            connection.Execute("DELETE FROM Log");
 
             // if the default channel doesn't exist, add it to the databsae
             // we can shortcut here since we know how big our class is and their ids
             // realistically everyone would have to be dynamically added
-            connection.Execute("INSERT OR IGNORE INTO Channels (Name, IsForum, Members)" +
-                "VALUES ('open-chat', 0, '1,2,3,4,5,6,7,8,9,10,11');");
+            connection.Execute("INSERT OR IGNORE INTO Channels (Name, IsForum, Members, MutedMembers)" +
+                "VALUES ('open-chat', 0, '1,2,3,4,5,6,7,8,9,10,11', '');");
 
             if ((await GetAllUsers()).Count() < 11)
             {
@@ -72,18 +88,54 @@ namespace BlackboardChat
         {
             using var connection = new SqliteConnection(name);
             var parameters = new { Channel = channel, Author = author, Content = content, TimeStamp = timestamp };
-            await connection.ExecuteAsync("INSERT INTO Messages (Channel, Author, Content, TimeStamp)" +
-                "VALUES (@Channel, @Author, @Content, @TimeStamp);", parameters);
+            await connection.ExecuteAsync("INSERT INTO Messages (Channel, Author, Content, TimeStamp, IsDeleted)" +
+                "VALUES (@Channel, @Author, @Content, @TimeStamp, 0);", parameters);
         }
 
         // inserts a new channel into the database
-        public static async Task AddChannel(string? channelName, bool isForum, string? members)
+        public static async Task AddChannel(string? channelName, bool isForum, string? members, string? topic = null)
         {
             using var connection = new SqliteConnection(name);
-            var parameters = new { Name = channelName, IsForum = isForum, Members = members };
-            await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Members)" +
-                "VALUES (@Name, @IsForum, @Members);", parameters);
+            var parameters = new { Name = channelName, IsForum = isForum, Members = members, Topic = topic };
+            await connection.ExecuteAsync("INSERT INTO Channels (Name, IsForum, Topic, Members, MutedMembers)" +
+                "VALUES (@Name, @IsForum, @Topic, @Members, '');", parameters);
         }
+
+        // gets a user's most recent message
+        public static async Task<Message> GetMostRecentMessage(int authorId)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Author = authorId };
+            return await connection.QueryFirstOrDefaultAsync<Message>("SELECT * FROM Messages WHERE Author = @Author ORDER BY TimeStamp DESC LIMIT 1", parameters);
+        }
+
+        public static async Task SetMessageAsDeleted(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            await connection.ExecuteAsync("UPDATE Messages SET IsDeleted = 1 WHERE rowid = @Id", parameters);
+        }
+
+        public static async Task<Message> GetMessageById(int id)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id };
+            return await connection.QueryFirstOrDefaultAsync<Message>("SELECT * FROM Messages WHERE rowid = @Id", parameters);
+        }
+
+        public static async Task<IEnumerable<User>> GetGloballyMutedUsers()
+        {
+            using var connection = new SqliteConnection(name);
+            return await connection.QueryAsync<User>("SELECT * FROM Users WHERE IsGloballyMuted = 1");
+        }
+
+        public static async Task SetUserIsGloballyMuted(int userId, bool value)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = userId, Muted = value ? 1 : 0};
+            await connection.ExecuteAsync("UPDATE Users SET IsGloballyMuted = @Muted WHERE rowid = @Id", parameters);
+        }
+
 
         // gets a channel's information by its name
         public static async Task<Channel> GetChannelByName(string channelName)
@@ -167,6 +219,34 @@ namespace BlackboardChat
             using var connection = new SqliteConnection(name);
             var parameters = new { Id = id, Members = members };
             await connection.ExecuteAsync("UPDATE Channels SET Members = @Members WHERE rowid = @Id", parameters);
+        }
+
+        //adds muted members locally to channel list(string) of muted members
+        public static async Task UpdateChannelMutedMembers(int id, string members)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Id = id, Members = members };
+            await connection.ExecuteAsync("UPDATE Channels SET MutedMembers = @Members WHERE rowid = @Id ", parameters);
+        }
+
+        public static async Task AddLogEntry(Action action, DateTime timestamp, string message)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Action = action, TimeStamp = timestamp, Message = message };
+            await connection.ExecuteAsync("INSERT INTO Log (Action, TimeStamp, Message) VALUES (@Action, @TimeStamp, @Message)", parameters);
+        }
+
+        public static async Task<IEnumerable<LogEntry>> GetLogWithAction(Action action)
+        {
+            using var connection = new SqliteConnection(name);
+            var parameters = new { Action = action };
+            return await connection.QueryAsync<LogEntry>("SELECT * FROM Log WHERE Action = @Action", parameters);
+        }
+
+        public static async Task<IEnumerable<LogEntry>> GetLog()
+        {
+            using var connection = new SqliteConnection(name);
+            return await connection.QueryAsync<LogEntry>("SELECT * FROM Log");
         }
 
         // creates a dummy class list with one professor and 10 students
