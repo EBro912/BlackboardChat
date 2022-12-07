@@ -142,7 +142,6 @@ function createDateString(date) {
 
 // Helper function to create a channel
 function addChannel(channel) {
-    // TODO: handle showing forum topic once implemented
     var button = document.createElement("button");
     button.type = "button";
     button.className = "btn btn-info";

@@ -50,15 +50,15 @@ namespace BlackboardChat
 
             // removes all existing channels for testing purposes
             // comment this out if you want to keep the channels made
-            connection.Execute("DELETE FROM Channels");
+            // connection.Execute("DELETE FROM Channels");
 
             // removes all existing messages for testing purposes
             // comment this out if you want to keep the messages sent
-            connection.Execute("DELETE FROM Messages");
+            // connection.Execute("DELETE FROM Messages");
 
             // removes all existing log messages for testing purposes
             // comment this out if you want to keep the log messages entered
-            connection.Execute("DELETE FROM Log");
+            // connection.Execute("DELETE FROM Log");
 
             // if the default channel doesn't exist, add it to the databsae
             // we can shortcut here since we know how big our class is and their ids

@@ -161,7 +161,6 @@ namespace BlackboardChat.Hubs
 
         public async Task AddProfUserChannel(User x)
         {
-            // TODO: handle adding members to a channel
             // all users can see new channels for now, this should be fixed
             string chName = x.Name.Replace(' ', '-');
             Channel channel = await Database.GetChannelByName(chName);
