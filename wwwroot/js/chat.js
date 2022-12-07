@@ -194,14 +194,13 @@ connection.on("RemoveChannel", function (channel) {
 
 connection.on("UpdateChannel", function (channel) {
     // reload user sidebar if we are looking at the channel being updated
-    if (channelCache.id === channel.id) {
-        changeChannel(channelCache.id);
-    }
-    if (localUser.isProfessor) return;
     if (channel.members.split(',').includes(localUser.id.toString())) {
-        // if we can already see the channel then do nothing
-        if ($(`#channelID_${channel.id}`).length)
+        if ($(`#channelID_${channel.id}`).length) {
+            if (channelCache.id === channel.id) {
+                changeChannel(channelCache.id);
+            }
             return;
+        }
         addChannel(channel);
     }
     else {
