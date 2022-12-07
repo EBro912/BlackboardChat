@@ -41,7 +41,7 @@ function addMessage(message) {
             var sender = (isLocalUser ? 'You' : userCache.at(message.author - 1).name);
 
             // create div for message
-            var messagebox = $("<div class ='messagediv' id ='message'></div>");
+            var messagebox = $("<div class='messagediv' id='message'></div>");
             messagebox.addClass(isLocalUser ? 'user' : 'otheruser');
             messagebox.attr('id', `message_${message.id}`);
 
@@ -103,7 +103,7 @@ function addMessage(message) {
         // forum topic message creation
 
         // create div for topic
-        var topicbox = $("<div class ='topicbox' id ='topic'></div>");
+        var topicbox = $("<div class='topicbox' id='topic'></div>");
         topicbox.attr('id', `message_${message.id}`);
 
         // create text for topic
@@ -207,7 +207,7 @@ connection.on("UpdateChannel", function (channel) {
     else {
         if ($(`#channelID_${channel.id}`).length) {
             // change back to the default channel if we get removed
-            changeChannel(0);
+            changeChannel(1);
             $(`#channelID_${channel.id}`).remove();
         }
     }
