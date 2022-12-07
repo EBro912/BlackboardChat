@@ -334,7 +334,7 @@ connection.on("LoginSuccessful", function (user) {
         document.getElementById("addChannel").hidden = false;
         document.getElementById("profSettings").hidden = false;
     }
-    if (!localUser.isProfessor) {
+    else
         document.getElementById("requestChat").hidden = false;
         document.getElementById("studSettings").hidden = false;
     }
